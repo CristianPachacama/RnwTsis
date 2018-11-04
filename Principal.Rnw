@@ -1,0 +1,246 @@
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% ----------------------   TESIS: CDP  -------------------------------
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+\documentclass[12pt,oneside]{book}
+
+% \usepackage{FormatoEPN/FormatoEpn}
+\usepackage{FormatoEpn}
+
+%\usepackage{showlabels}
+
+\usepackage{mathpazo}
+\usepackage{enumitem}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{hyperref}
+% \input{Comandos Extra/comandos.tex}
+\input{comandos.tex}
+
+\titulo{An·lisis Cl˙ster para series de tiempo estacionales y modelizaciÛn de caudales de rÌos del Brasil.}
+%esta bien escribir esas palabras con may√∫sculas
+\carrera{IngenierÌa Matem·tica}
+\autor{Cristian David Pachacama SimbaÒa}
+\correoautor{\url{cristian.pachacama01@epn.edu.ec}}
+\director{Uquillas Andrade Adriana, Ph.D.}
+\correodirector{\url{adriana.uquillas@epn.edu.ec}}
+
+\fecha{Octubre 2018}
+
+%-------------------------------------------------------------------
+%--------------------  INICIO DE DOCUMENTO  ------------------------
+%-------------------------------------------------------------------
+\begin{document}
+\frontmatter
+\portadilla
+\declaracion
+\certificacion
+
+%Setear opciones de Chunks -----------------------------------
+<<echo=FALSE>>=
+require(knitr)
+# opts_knit$set(root.dir = normalizePath('../'))
+opts_chunk$set(echo=FALSE,warning=FALSE,error = F,message = F)
+@
+
+
+%Insertamos agradecimiento
+<<agradecimiento, child="Agradecimientos/Agradecimiento.Rnw">>=
+@
+
+%Insertamos dedicatoria
+<<dedicatoria, child='Agradecimientos/Dedicatoria.Rnw'>>=
+@
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+%Insertamos Abstract
+<<abstract, child='Capitulos/Cap 0 - Abstract.Rnw'>>=
+@
+
+\mainmatter
+\addtolength{\abovedisplayskip}{-1mm}
+\addtolength{\belowdisplayskip}{-1mm}
+
+% Introduccion
+<<introduccion, child='Capitulos/Cap 1 - Introduccion.Rnw'>>=
+@
+
+%Capitulo2: Marco Teorico ---------------------------------
+\chapter{Marco TeÛrico}
+% 2.1 DescomposiciÛn STL - Loess
+<<stl-loess, child='Capitulos/Cap 2 - Marco Teorico/S1 - DescomposiciÛn STL - Loess.Rnw'>>=
+@
+
+% 2.2 Limpieza de Series de Tiempo
+<<limpieza, child='Capitulos/Cap 2 - Marco Teorico/S2 - Limpieza de Series de Tiempo.Rnw'>>=
+@
+
+% 2.3 Funciones de Disimilitud entre TS's 
+<<disimilitud, child='Capitulos/Cap 2 - Marco Teorico/S3 - Funciones de Disimilitud entre TS.Rnw'>>=
+@
+
+% 2.4 Algoritmos de ClusterizaciÛn
+<<clusterizacion, child='Capitulos/Cap 2 - Marco Teorico/S4 - Algoritmos de ClusterizaciÛn.Rnw'>>=
+@
+
+% 2.5 ACP Funcional
+<<acp-funcional, child='Capitulos/Cap 2 - Marco Teorico/S5 - ACP Funcional.Rnw'>>=
+@
+
+% 2.6 ModelizaciÛn SARIMAX
+<<sarimax, child='Capitulos/Cap 2 - Marco Teorico/S6 - Modelizacion SARIMAX.Rnw'>>=
+@
+
+% ---------------------------------------------------------
+
+%Capitulo3: Metodologia
+<<capitulo3, child='Capitulos/Cap 3 - Metodologia.Rnw'>>=
+@
+
+%Conclusiones y Recomendaciones
+<<conclusiones, child='Capitulos/Cap 4 - Conclusiones.Rnw'>>=
+@
+
+\appendix
+
+
+\nocite{*}
+
+\bibliographystyle{siam}
+\bibliography{Bibliografia/bibliografia}
+\addcontentsline{toc}{chapter}{BibliografÌa}
+
+
+% \bibliographystyle{apalike} %Normas APA para Referencias!!!!!!!
+% \printbibliography
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% \begin{document}
+
+
+% \frontmatter
+% \portadilla
+% \declaracion
+% \certificacion
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%     AGRADECIMIENTOS    %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{agradecimiento}
+% 
+% A mi familia, ya que su cari√±o y apoyo me llevaron a donde ahora estoy.  
+% A mis mejores amigos Miguel, Rubi, Luis y Pablo, por brindarme su amistad y tan gratos momentos.
+% 
+% A mi tutora Adriana por ser una gu√≠a y apoyarme desde el primer momento a alcanzar esta meta, gracias por depositar su confianza en mi.
+% A los profesores Erwin Jimenez, y de manera especial a Juan Carlos Trujillo quienes hicieron nacer en mi la pasi√≥n por la Matem√°tica, pasi√≥n que espero inspirar a m√°s generaciones de estudiantes. 
+% 
+% Finalmente, a grandes matem√°ticos de la historia como George Cantor,  Sime√≥n Poisson , Abraham Wald, y Karl Pearson, cuyo trabajo me inspir√≥ a profundizar en el conocimiento de esta bella ciencia.
+% 
+% 
+% \end{agradecimiento}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%       DEDICATORIA      %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{dedicatoria}
+% A mis padres Magdalena y Lucio, por su incondicional amor, sus sabios consejos y su paciencia, siempre lo tendr√© presente. A Isabel por su apoyo incondicional, y por aparecer en el momento exacto en mi vida para llenarla de felicidad. A Miguel, Rubi, Pablo y Luis por brindarme su sincera amistad.
+% 
+% \end{dedicatoria}
+
+
+% \tableofcontents
+% \listoffigures
+% \listoftables
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%         ABSTRACT       %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \include{Capitulos/0Resumen}
+
+
+% \mainmatter
+% \addtolength{\abovedisplayskip}{-1mm}
+% \addtolength{\belowdisplayskip}{-1mm}
+%\include{Capitulos/CapituloUNO}
+
+
+
+\include{Capitulos/1Introduccion}
+
+
+
+\include{Capitulos/2MarcoTeorico}
+
+
+
+\include{Capitulos/3Metodologia}
+
+
+
+\include{Capitulos/conclusiones}
+
+\appendix
+\include{Apendice/1Apend}
+
+
+
+
+
+\nocite{*}
+
+\bibliographystyle{siam}
+\bibliography{bibTesis}
+\addcontentsline{toc}{chapter}{Bibliograf√≠a}
+
+
+\end{document} 

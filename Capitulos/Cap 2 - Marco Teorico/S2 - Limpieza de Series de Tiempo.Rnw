@@ -1,0 +1,7 @@
+\section{Tratamiento de Valores perdidos}
+
+En este capítulo ilustraremos una propuesta para el tratamiento de valores perdidos en series de tiempo estacionales.
+
+
+
+
