@@ -20,7 +20,7 @@
 \input{comandos.tex}
 
 \titulo{Análisis Clúster para series de tiempo estacionales y modelización de caudales de ríos del Brasil.}
-%esta bien escribir esas palabras con mayÃºsculas
+%esta bien escribir esas palabras con mayúsculas
 \carrera{Ingeniería Matemática}
 \autor{Cristian David Pachacama Simbaña}
 \correoautor{\url{cristian.pachacama01@epn.edu.ec}}

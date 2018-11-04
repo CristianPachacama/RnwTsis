@@ -1,1 +1,40 @@
-\section{Métricas y Funciones de Disimilitud entre Series de Tiempo}
+\section{Distancias y Funciones de Disimilitud entre Series de Tiempo}
+
+Desde un punto de vista general el término proximidad indica el concepto de cercanía en espacio, tiempo o cualquier otro contexto. Desde un punto de vista matemático, ese término hace referencia al concepto de disimilaridad o similaridad entre dos elementos. 
+Sea O un conjunto finito o infinito de elementos (individuos, estímulos sujetos u objetos) sobre los que queremos definir una proximidad.
+
+
+\begin{defic}
+Dados dos puntos $o_i, o_j \in O$ y $\delta$ es una función real de $O \times O \rightarrow \mathbb{R}$, con $\delta_{ij}=\delta(o_i,o_j).$ Se diría que $\delta$ es una disimilaridad si verifica
+\begin{itemize}
+\item $\delta_{ij}=\delta_{ji}$, $\forall i,j.$
+\item $\delta_{ii} \leq \delta_{ij}$, $\forall i,j.$
+\item $\delta_{ii}=\delta_{o}$, $\forall i.$
+\end{itemize}
+\end{defic}
+La primera condición podría eliminarse, aunque resulta necesaria si se desea comparar con una distancia. No obstante, esa condición suele violarse cuando las disimilaridades provienen de juicios emitidos por sujetos, ya que éstos no siempre califican igual al par $(i,j)$ que al par $(j,i)$. Las condiciones segunda y tercera suelen establecerse igualmente para $\delta_o=0$, aunque también es conocido que cuando a un individuo le son presentados dos estímulos idénticos, éste tiende a asignarles algún valor de disimilaridad no nulo y generalmente positivo, y además no siempre se define $\delta_o \geq 0$ 0 ya que, si por ejemplo las disimilaridades provienen de una transformación, éstas podrían ser negativas.
+\begin{defic}
+Una función real $s$ de $O \times O \rightarrow \mathbb{R}$, se dirá que es una similaridad si verifica:
+\begin{itemize}
+\item $s_{ij}=s_{ji}$, $\forall i,j.$
+\item $s_{ij} \leq s_{ii}$ $\forall i,j.$
+\item $s_{ii}=s_{o}$, $\forall i.$
+\end{itemize}
+\end{defic}
+Algunos autores consideran $s_o=0$, y además suponen que $0 \leq s_{ij} \leq 1$ ya que una similaridad es un término opuesto al de disimilaridad por lo que deberá existir alguna transformación monótona $t$ tal que $t(s)=\delta$. Una transformación de ese tipo podría ser $\delta=1-s$ si $0 \leq s \leq 1$, aunque otra utilizada en INDSCAL podría ser $\delta=-s$, sin que $s$ deba estar acotada.\\
+Puesto que la idea fundamental sobre la que se basa el MDS es la de asociar disimilaridades a distancias, hemos de verificar, entre otras, que se cumpla la desigualdad triangular. No obstante, si se cumplen los demás axiomas salvo éste, es posible transformar los datos para que ésta también sea verificada, tomando $c=\max_{i,j,h}(\delta_{hj}-\delta_{hi}-\delta_{ij})$ de forma que, $\gamma_{ii}=0$; $\gamma_{ii}=\delta_{ij}+c$, $\forall i \neq j$. \\
+Existen diferentes medidas para el cálculo de disimilaridades o similaridades entre un par de variables o individuos. Si consideramos una matriz de datos $x_{ri}$, obtenida de $n$ objetos sobre $p$ variables, algunos ejemplos de medidas son:
+\begin{itemize}
+\item \textit{Distancia euclídea ponderada}
+$$ \delta_{rs}=\left(\displaystyle \sum_i w_i(x_{ri}-x_{si}) \right)^{1/2} $$
+\item \textit{Métrica de Minkowski}
+$$ \delta_{rs}=\left(\displaystyle \sum_i \abs{x_{ri}-x_{si}}^{\lambda}\right)^{1/\lambda}, \ \ \lambda \geq 1 $$
+\item \textit{Separación angular}
+$$ \delta_{rs}=1-\frac{\sum_i x_{ri}x_{si}}{(\sum_i x_{ri}^2 \sum_i x_{si}^2)^{1/2}} $$
+\item \emphasise{Variograma}
+$$ \delta_{rs}=\frac{\gamma_{rs}}{\sum_{r,s} \gamma_{rs} } $$
+Donde:
+$$\bar{X}_{r.}=\frac{1}{n}\sum_{i}X_{ri}$$
+$$\gamma_{rs}=\frac{1}{(n-1)}\left[\sum_{i} (X_{ri}-X_{si})^2-n(\bar{X}_{r.}-\bar{X}_{s.})^2\rigth]$$
+\end{itemize}
+

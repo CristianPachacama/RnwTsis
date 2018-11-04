@@ -1,0 +1,435 @@
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% ----------------------   TESIS: CDP  -------------------------------
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+\documentclass[12pt,oneside]{book}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+
+% \usepackage{FormatoEPN/FormatoEpn}
+\usepackage{FormatoEpn}
+
+%\usepackage{showlabels}
+
+\usepackage{mathpazo}
+\usepackage{enumitem}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{hyperref}
+% \input{Comandos Extra/comandos.tex}
+\input{comandos.tex}
+
+\titulo{Análisis Clúster para series de tiempo estacionales y modelización de caudales de ríos del Brasil.}
+%esta bien escribir esas palabras con mayúsculas
+\carrera{Ingeniería Matemática}
+\autor{Cristian David Pachacama Simbaña}
+\correoautor{\url{cristian.pachacama01@epn.edu.ec}}
+\director{Uquillas Andrade Adriana, Ph.D.}
+\correodirector{\url{adriana.uquillas@epn.edu.ec}}
+
+\fecha{Octubre 2018}
+
+%-------------------------------------------------------------------
+%--------------------  INICIO DE DOCUMENTO  ------------------------
+%-------------------------------------------------------------------
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+\frontmatter
+\portadilla
+\declaracion
+\certificacion
+
+%Setear opciones de Chunks -----------------------------------
+
+
+
+%Insertamos agradecimiento
+
+% <<set-parent, echo=FALSE, cache=FALSE>>=
+% set_parent('../Principal.Rnw')
+% @
+
+
+
+\begin{agradecimiento}
+
+A mi familia, ya que su cariño y apoyo me llevaron a donde ahora estoy.  
+A mis mejores amigos Miguel, Rubi, Luis y Pablo, por brindarme su amistad y tan gratos momentos.
+
+A mi tutora Adriana por ser una guía y apoyarme desde el primer momento a alcanzar esta meta, gracias por depositar su confianza en mi.
+A los profesores Erwin Jimenez, Luis Horna, y de manera especial a Juan Carlos Trujillo quienes hicieron nacer en mi la pasión por la Matemática, pasión que espero inspirar a más generaciones de estudiantes. 
+
+Finalmente, a grandes matemáticos de la historia como George Cantor,  Simeón Poisson , Abraham Wald, y Karl Pearson, cuyo trabajo me inspiró a profundizar en el conocimiento de esta bella ciencia.
+
+
+\end{agradecimiento}
+
+%Insertamos dedicatoria
+
+\begin{dedicatoria}
+A mis padres Magdalena y Lucio, por su incondicional amor, sus sabios consejos y su paciencia, siempre lo tendré presente. A Isabel por su apoyo incondicional, y por aparecer en el momento exacto en mi vida para llenarla de felicidad. A Miguel, Rubi, Pablo y Luis por brindarme su sincera amistad.
+
+\end{dedicatoria}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+%Insertamos Abstract
+
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% ----------------------   ABSTRACT  ---------------------------------
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+% Cargamos Preambulo
+% <<set-parent, echo=FALSE, cache=FALSE>>=
+% set_parent('informe_semds.Rnw')
+% @
+
+\chapter*{Resumen}
+%\onehalfspacing
+\addcontentsline{toc}{chapter}{Resumen}
+
+En el presente trabajo se utilizará el Análisis Clúster para agrupar estaciones (asociadas a ríos en Brasil), basándonos en el comportamiento temporal del caudal de los ríos que se mide en dichas estaciones, y posteriormente modelar los caudales (1 modelo por clúster) usando variables micro y macro climáticas.
+
+\textbf{Palabras clave:} Análisis Clúster para Series de Tiempo, descomposición STL, SARIMAX, Análisis de Componentes Principales Funcional.
+
+\chapter*{Abstract}
+%\onehalfspacing
+\addcontentsline{toc}{chapter}{Abstract}
+
+\textbf{Keywords:}  HHHH
+
+\mainmatter
+\addtolength{\abovedisplayskip}{-1mm}
+\addtolength{\belowdisplayskip}{-1mm}
+
+% Introduccion
+
+\chapter{Introducción}
+
+
+Brasil tiene uno de los sistemas hidrológicos más complejos, diversos y extensos del mundo. A diferencia de la gran mayoría de los países desarrollados, Brasil tiene en los ríos su principal fuente de generación de electricidad, ocupando el tercer lugar dentro de los más grandes productores hidroeléctricos del mundo. Debido a la importancia del sector hidroeléctrico buscar formas de facilitar y mejorar el modelamiento de datos asociados a este sector es un problema prioritario. Problema provocado por la dificultad que supone lidiar con la enorme cantidad de datos (accesibles desde la web de instituciones como ANA, ONS, NOAA, CPTEC, etc.) asociados a mediciones de Caudales de los ríos que componen este sistema, que cuenta con alrededor de 150 estaciones de medición repartidas en todo Brasil. Dichos datos se presentan en forma de Series de Tiempo que posee tres características que dificultan su análisis, la primera es que estas series de tiempo poseen observaciones diarias de los caudales en un periodo de tiempo de alrededor de 30 años, es decir, son series muy extensas. La segunda característica es que estas series de tiempo son estacionales, y por último existe evidencia de que el ruido o error asociado a estas series no se distribuye normalmente, sino que su distribución posee colas más pesadas como las analizadas en teoría de valores extremos. En ese contexto, notamos que es posible disminuir la dimensión del problema a través la identificación de clústers o zonas representativas (no necesariamente geográficas) que resuman el comportamiento temporal que poseen los caudales de los ríos. Esto en términos de modelamiento esto se traduce en pasar del problema de modelar el nivel de caudal en todas las 150 estaciones, al problema de modelar únicamente 1 estación por cada clúster.
+
+
+Ya que el problema se basa en identificar grupos de ríos cuyos Caudales se comportan de manera similar en el tiempo, se propone la utilización de el "Análisis Clúster de Series de Tiempo", que es una técnica de agrupamiento que considera una función de disimilitud" entre las series de tiempo (que mide que tan distintas son un par de series) y a partir de ella crea grupos de series, cada grupo contiene series de tiempo parecidas". Al elegir adecuadamente la función de disimilitud (diseñada para series de tiempo) es posible agrupar a los ríos en grupos basados en el comportamiento temporal de sus caudales. Esto con la finalidad de lidiar con la complejidad que supone analizar y modelar esta enorme cantidad de series de tiempo de caudales, pasando de analizar alrededor de 150 series a unas pocas (una serie por Clúster), sin dejar de lado la estructura y comportamiento estacional de cada una de ellas, partiendo de una adecuada elección de la función de disimilitud. Hay que destacar que el modelamiento de caudales juega un rol trascendental en la creación de políticas que adopta sector energético de Brasil, que como mencionamos anteriormente está alimentado en su mayoría por el sector hidroeléctrico en donde el análisis que planteamos permitiría profundizar en la planificación de las operaciones de plantas hidroeléctricas que depende directamente del comportamiento temporal de los ríos que las alimentan, esta planificación podría evitar por ejemplo eventos de déficit energético provocados por una deciencia estructural de la disponibilidad de energía, que a la larga tiene impactos económicos y sociales mayores que los cortes de energía.
+
+%Capitulo2: Marco Teorico ---------------------------------
+\chapter{Marco Teórico}
+% 2.1 Descomposición STL - Loess
+
+\section{Descomposición STL - Loess}
+
+STL es un procedimiento de filtrado que permite descomponer una serie de tiempo en sus componentes estacional, tendencia y Residuo. STL tiene un diseño simple que consiste en una secuencia de aplicaciones del Loess Smoother; la simplicidad permite el análisis de las propiedades del procedimiento y permite un cálculo rápido, incluso para series de tiempo muy largas y grandes cantidades de tendencia y suavizado estacional. Otras características de STL son la especificación de cantidades de suavizado estacional y de tendencias que varían, de manera casi continua, desde una cantidad muy pequeña de suavizado hasta una cantidad muy grande; estimaciones robustas de la tendencia y los componentes estacionales que no están distorsionados por un comportamiento aberrante en los datos; especificación del período de componente estacional a cualquier múltiplo entero del intervalo de muestreo de tiempo mayor que uno; y la capacidad de descomponer series de tiempo con valores perdidos.
+
+% 2.2 Limpieza de Series de Tiempo
+
+\section{Tratamiento de Valores perdidos}
+
+En este capítulo ilustraremos una propuesta para el tratamiento de valores perdidos en series de tiempo estacionales. Para ello consideremos una serie de tiempo $(X_t)_{t\in T}$, de la que conocemos las observaciones 
+$$x_1,x_2,...,x_{j-1}, x_j, x_k, x_{k+1},...,x_n$$
+
+donde $1 < j < k < n$. Recordemos que la descomposición STL-Loess permité descomponer aditivamente la serie en sus componentes de tendencia y estacionalidad inclusive en aquellos valores de t para los que no conocemos $x_t$ , es decir, para $t=j+1, j+2, ..., k-1$. 
+
+Luego de descomoponer $X_t$ obtenemos su tendencia $D_t$, estacionalidad $S_t$ (para $t=1,2,...,n$), y el residuo $U_t$ (para $t=1,2,...,j,k,...,n$). Además estás series cumplen la relación siguiente.
+
+
+\begin{equation}
+\label{eq:stl_descomp}
+X_t = D_t + S_t + U_t
+\end{equation}
+
+Ilustramos lo antes mencionado en el siguiente gráfico ( \ref{fig:stl_descomp} ) , que corresponde a la descomposición STL-Loess de una serie de datos mensuales de precipitación (lluvias) medidos en cierta zona de Brasil, está serie tiene estacionalidad anual (12 meses); notemos que es necesario fijar los parámetros de la descomposición adecuadamente ya que están asociados al número de retardos considerados al estimar tanto la componente estacional como la tendencia. 
+
+El gráfico muestra en la primera fila la serie climática, en segundo lugar muestra su componente estacional, en tercera fila encontramos su componente de tendencia, y finalmente el residuo. Como podemos notar las componentes de tendencia y estacionalidad están definidas en todo el dominio de tiempo.
+
+\begin{figure}[h]
+\caption{Descomposición STL-Loess}
+\includegraphics[width=15cm]{Imagenes/Cap2-Stl-Loess.png}
+\label{fig:stl_descomp}
+\centering
+\end{figure}
+
+Pues bien, notemos que bastaría conocer los valores de $U_t$ en para todo $t$ e inmediatamente conoceríamos los de $X_t$ por la ecuación \eqref{eq:stl_descomp}. Así, bastaría simular los valores perdidos de $U_t$ que tiende a comportarse como un proceso estacionario, suponiendo que se especificaron bien los parámetros de la descomposición STL. 
+Una forma simple de simular dichos datos, es partiendo de la función de distribución empírica de los Residuos 
+$$\hat{F}_0(u):=\frac{1}{n}\sum_{i=1}^{n} I_{(x_i\leq u)} $$
+
+una vez calculada $\hat{F}_0(u)$ usamos el algoritmo siguiente.
+
+
+
+
+
+
+
+
+
+
+% 2.3 Funciones de Disimilitud entre TS's 
+
+\section{Distancias y Funciones de Disimilitud entre Series de Tiempo}
+
+Desde un punto de vista general el término proximidad indica el concepto de cercanía en espacio, tiempo o cualquier otro contexto. Desde un punto de vista matemático, ese término hace referencia al concepto de disimilaridad o similaridad entre dos elementos. 
+Sea O un conjunto finito o infinito de elementos (individuos, estímulos sujetos u objetos) sobre los que queremos definir una proximidad.
+
+
+\begin{defic}
+Dados dos puntos $o_i, o_j \in O$ y $\delta$ es una función real de $O \times O \rightarrow \mathbb{R}$, con $\delta_{ij}=\delta(o_i,o_j).$ Se diría que $\delta$ es una disimilaridad si verifica
+\begin{itemize}
+\item $\delta_{ij}=\delta_{ji}$, $\forall i,j.$
+\item $\delta_{ii} \leq \delta_{ij}$, $\forall i,j.$
+\item $\delta_{ii}=\delta_{o}$, $\forall i.$
+\end{itemize}
+\end{defic}
+La primera condición podría eliminarse, aunque resulta necesaria si se desea comparar con una distancia. No obstante, esa condición suele violarse cuando las disimilaridades provienen de juicios emitidos por sujetos, ya que éstos no siempre califican igual al par $(i,j)$ que al par $(j,i)$. Las condiciones segunda y tercera suelen establecerse igualmente para $\delta_o=0$, aunque también es conocido que cuando a un individuo le son presentados dos estímulos idénticos, éste tiende a asignarles algún valor de disimilaridad no nulo y generalmente positivo, y además no siempre se define $\delta_o \geq 0$ 0 ya que, si por ejemplo las disimilaridades provienen de una transformación, éstas podrían ser negativas.
+\begin{defic}
+Una función real $s$ de $O \times O \rightarrow \mathbb{R}$, se dirá que es una similaridad si verifica:
+\begin{itemize}
+\item $s_{ij}=s_{ji}$, $\forall i,j.$
+\item $s_{ij} \leq s_{ii}$ $\forall i,j.$
+\item $s_{ii}=s_{o}$, $\forall i.$
+\end{itemize}
+\end{defic}
+Algunos autores consideran $s_o=0$, y además suponen que $0 \leq s_{ij} \leq 1$ ya que una similaridad es un término opuesto al de disimilaridad por lo que deberá existir alguna transformación monótona $t$ tal que $t(s)=\delta$. Una transformación de ese tipo podría ser $\delta=1-s$ si $0 \leq s \leq 1$, aunque otra utilizada en INDSCAL podría ser $\delta=-s$, sin que $s$ deba estar acotada.\\
+Puesto que la idea fundamental sobre la que se basa el MDS es la de asociar disimilaridades a distancias, hemos de verificar, entre otras, que se cumpla la desigualdad triangular. No obstante, si se cumplen los demás axiomas salvo éste, es posible transformar los datos para que ésta también sea verificada, tomando $c=\max_{i,j,h}(\delta_{hj}-\delta_{hi}-\delta_{ij})$ de forma que, $\gamma_{ii}=0$; $\gamma_{ii}=\delta_{ij}+c$, $\forall i \neq j$. \\
+Existen diferentes medidas para el cálculo de disimilaridades o similaridades entre un par de variables o individuos. Si consideramos una matriz de datos $x_{ri}$, obtenida de $n$ objetos sobre $p$ variables, algunos ejemplos de medidas son:
+\begin{itemize}
+\item \textit{Distancia euclídea ponderada}
+$$ \delta_{rs}=\left(\displaystyle \sum_i w_i(x_{ri}-x_{si}) \right)^{1/2} $$
+\item \textit{Métrica de Minkowski}
+$$ \delta_{rs}=\left(\displaystyle \sum_i \abs{x_{ri}-x_{si}}^{\lambda}\right)^{1/\lambda}, \ \ \lambda \geq 1 $$
+\item \textit{Separación angular}
+$$ \delta_{rs}=1-\frac{\sum_i x_{ri}x_{si}}{(\sum_i x_{ri}^2 \sum_i x_{si}^2)^{1/2}} $$
+\item \emphasise{Variograma}
+$$ \delta_{rs}=\frac{\gamma_{rs}}{\sum_{r,s} \gamma_{rs} } $$
+Donde:
+$$\bar{X}_{r.}=\frac{1}{n}\sum_{i}X_{ri}$$
+$$\gamma_{rs}=\frac{1}{(n-1)}\left[\sum_{i} (X_{ri}-X_{si})^2-n(\bar{X}_{r.}-\bar{X}_{s.})^2\rigth]$$
+\end{itemize}
+
+
+% 2.4 Algoritmos de Clusterización
+
+\section{Algoritmos de Clusterización}
+
+% 2.5 ACP Funcional
+
+\section{Análisis de Componentes Principales Funcional}
+
+% 2.6 Modelización SARIMAX
+
+\section{Modelo SARIMAX}
+
+% ---------------------------------------------------------
+
+%Capitulo3: Metodologia
+
+\chapter{Metodología}
+
+
+El Análisis Clúster es un técnica de aprendizaje no supervisada que tiene como objetivo dividir un conjunto de objetos en grupos homogéneos (clústers). La partición se realiza de tal manera que los objetos en el mismo clúster son más similares entre sí que los objetos en diferentes grupos según un criterio definido. En muchas aplicaciones reales, el análisis de clúster debe realizarse con datos asociados a  series de tiempo. De hecho, los problemas de agrupamiento de series de tiempo surgen de manera natural en una amplia variedad de campos, incluyendo economía, finanzas, medicina, ecología, estudios ambientales, ingeniería y muchos otros. 
+Con frecuencia, la agrupación de series de tiempo desempeña un papel central en el problema estudiado. Estos argumentos motivan el creciente interés en la literatura sobre la agrupación de series de tiempo, especialmente en las últimas dos décadas, donde se ha proporcionado una gran cantidad de contribuciones sobre este tema. En \cite{liao2005clustering} se puede encontrar un excelente estudio sobre la agrupación de series de tiempo, aunque posteriormente se han realizado nuevas contribuciones significativas. Particularmente importante en la última década ha sido la explosión de documentos sobre el tema provenientes tanto de comunidades de minería de datos como de reconocimiento de patrones. \cite{fu2011review} proporciona una visión general completa y exhaustiva de las últimas orientaciones de minería de datos de series de tiempo, incluida una gama de problemas clave como representación, indexación y segmentación de series de tiempo, medidas de disimilitud, procedimientos de agrupamiento y herramientas de visualización.
+
+Una pregunta crucial en el Análisis Clúster es establecer lo que queremos decir con objetos de datos "similares", es decir, determinar una medida de similitud (o disimilitud) adecuada entre dos objetos. En el contexto específico de los datos asociados a series de tiempo, el concepto de disimilitud es particularmente complejo debido al carácter dinámico de la serie. Las diferencias generalmente consideradas en la agrupación convencional no podrían funcionar adecuadamente con los datos dependientes del tiempo porque ignoran la relación de interdependencia entre los valores. 
+
+De esta manera, diferentes enfoques para definir una función de disimilitud entre series de tiempo han sido propuestos en la literatura pero nos centraremos en aquellas medidas asociadas a la autocorrelación (simple, e inversa), correlación cruzada y periodograma de las series (Ver: \cite{struzik1999haar};  \cite{galeano2000multivariate}; \cite{caiado2006periodogram}; \cite{chouakria2007adaptive}). Estos enfoques basados en características tienen como objetivo representar la estructura dinámica de cada serie mediante un vector de características de menor dimensión, lo que permite una reducción de dimensionalidad (las series temporales son esencialmente datos de alta dimensionalidad) y un ahorro significativo en el tiempo de cálculo, además de que nos ayudan a alcanzar el objetivo central por el que usaremos el Análisis Clúster que es el de la modelización de series de tiempo.
+
+Una vez que se determina la medida de disimilitud, se obtiene una matriz de disimilitud inicial (que contiene la disimilitud entre parejas de series), y luego se usa un algoritmo de agrupamiento convencional para formar los clústers (grupos) con las series. De hecho, la mayoría de los enfoques de agrupamiento de series de tiempo revisados por \cite{liao2005clustering} son variaciones de procedimientos generales como por ejemplo: K-Means, K-Medoids, PAM, CLARA \cite{kaufman1986clustering} o de Clúster jerárquico que utilizan una gama de disimilitudes específicamente diseñadas para tratar con series de tiempo y algunas de sus características. 
+
+Una etapa adicional dentro del análisis clúster consiste en determinar la cantidad de clústers que es más apropiada para los datos. Idealmente, los clústers resultantes no solo deberían tener buenas propiedades estadísticas (compactas, bien separadas, conectadas y estables), sino también resultados relevantes. Se han propuesto una variedad de medidas y métodos para validar los resultados de un análisis clúster y determinar tanto el número de clústers, así como identificar qué algoritmo de agrupamiento ofrece el mejor rendimiento, algunas de estas ellas pueden encontrarse en \cite{fraley1998many}; \cite{duda2001pattern} ; \cite{salvador2004determining} ; \cite{kerr2001bootstrapping}. Esta validación puede basarse únicamente en las propiedades internas de los datos o en alguna referencia externa.
+
+Posteriormente se procede al modelamiento SARIMAX de los caudales usando además variables micro y macro climáticas que podrían explicar de mejor manera el comportamiento de estos caudales, cabe mencionar que se modelara únicamente un caudal por cada clúster (grupo).
+El modelo SARIMAX propuesto en \cite{box2015time} es un modelo SARIMA (Seasonal Autoregressive Integrated Moving Average) que incluye variables exógenas. Es decir, compone un modelo de regresión ordinario que usa variables exógenas en el modelo SARIMA que se usa para estudiar series de tiempo estacionales.
+
+%Conclusiones y Recomendaciones
+
+\chapter{Conclusiones y Recomendaciones}
+
+\appendix
+
+
+\nocite{*}
+
+\bibliographystyle{siam}
+\bibliography{Bibliografia/bibliografia}
+\addcontentsline{toc}{chapter}{Bibliografía}
+
+
+% \bibliographystyle{apalike} %Normas APA para Referencias!!!!!!!
+% \printbibliography
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% \begin{document}
+
+
+% \frontmatter
+% \portadilla
+% \declaracion
+% \certificacion
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%     AGRADECIMIENTOS    %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{agradecimiento}
+% 
+% A mi familia, ya que su cariÃ±o y apoyo me llevaron a donde ahora estoy.  
+% A mis mejores amigos Miguel, Rubi, Luis y Pablo, por brindarme su amistad y tan gratos momentos.
+% 
+% A mi tutora Adriana por ser una guÃ­a y apoyarme desde el primer momento a alcanzar esta meta, gracias por depositar su confianza en mi.
+% A los profesores Erwin Jimenez, y de manera especial a Juan Carlos Trujillo quienes hicieron nacer en mi la pasiÃ³n por la MatemÃ¡tica, pasiÃ³n que espero inspirar a mÃ¡s generaciones de estudiantes. 
+% 
+% Finalmente, a grandes matemÃ¡ticos de la historia como George Cantor,  SimeÃ³n Poisson , Abraham Wald, y Karl Pearson, cuyo trabajo me inspirÃ³ a profundizar en el conocimiento de esta bella ciencia.
+% 
+% 
+% \end{agradecimiento}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%       DEDICATORIA      %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{dedicatoria}
+% A mis padres Magdalena y Lucio, por su incondicional amor, sus sabios consejos y su paciencia, siempre lo tendrÃ© presente. A Isabel por su apoyo incondicional, y por aparecer en el momento exacto en mi vida para llenarla de felicidad. A Miguel, Rubi, Pablo y Luis por brindarme su sincera amistad.
+% 
+% \end{dedicatoria}
+
+
+% \tableofcontents
+% \listoffigures
+% \listoftables
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%         ABSTRACT       %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \include{Capitulos/0Resumen}
+
+
+% \mainmatter
+% \addtolength{\abovedisplayskip}{-1mm}
+% \addtolength{\belowdisplayskip}{-1mm}
+%\include{Capitulos/CapituloUNO}
+
+
+
+\include{Capitulos/1Introduccion}
+
+
+
+\include{Capitulos/2MarcoTeorico}
+
+
+
+\include{Capitulos/3Metodologia}
+
+
+
+\include{Capitulos/conclusiones}
+
+\appendix
+\include{Apendice/1Apend}
+
+
+
+
+
+\nocite{*}
+
+\bibliographystyle{siam}
+\bibliography{bibTesis}
+\addcontentsline{toc}{chapter}{BibliografÃ­a}
+
+
+\end{document} 
