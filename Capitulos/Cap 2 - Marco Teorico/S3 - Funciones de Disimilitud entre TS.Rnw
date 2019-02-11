@@ -1,29 +1,38 @@
-\section{Distancias y Funciones de Disimilitud entre Series de Tiempo}
+\section{Análisis de Conglomerados (Clúster)}
 
-Desde un punto de vista general el término proximidad indica el concepto de cercanía en espacio, tiempo o cualquier otro contexto. Desde un punto de vista matemático, ese término hace referencia al concepto de disimilaridad o similaridad entre dos elementos. 
+
+El Análisis Clúster es un técnica de aprendizaje no supervisada que tiene como objetivo dividir un conjunto de objetos en grupos homogéneos (clústers). La partición se realiza de tal manera que los objetos en el mismo clúster son más similares entre sí que los objetos en diferentes grupos según un criterio definido. En muchas aplicaciones reales, el análisis de clúster debe realizarse con datos asociados a  series de tiempo. De hecho, los problemas de agrupamiento de series de tiempo surgen de manera natural en una amplia variedad de campos, incluyendo economía, finanzas, medicina, ecología, estudios ambientales, ingeniería y muchos otros. 
+Con frecuencia, la agrupación de series de tiempo desempeña un papel central en el problema estudiado. Estos argumentos motivan el creciente interés en la literatura sobre la agrupación de series de tiempo, especialmente en las últimas dos décadas, donde se ha proporcionado una gran cantidad de contribuciones sobre este tema. En \cite{liao2005clustering} se puede encontrar un excelente estudio sobre la agrupación de series de tiempo, aunque posteriormente se han realizado nuevas contribuciones significativas. Particularmente importante en la última década ha sido la explosión de documentos sobre el tema provenientes tanto de comunidades de minería de datos como de reconocimiento de patrones. \cite{fu2011review} proporciona una visión general completa y exhaustiva de las últimas orientaciones de minería de datos de series de tiempo, incluida una gama de problemas clave como representación, indexación y segmentación de series de tiempo, medidas de disimilitud, procedimientos de agrupamiento y herramientas de visualización.
+
+Una pregunta crucial en el Análisis Clúster es establecer lo que queremos decir con objetos de datos "similares", es decir, determinar una medida de similitud (o disimilitud) adecuada entre dos objetos. En el contexto específico de los datos asociados a series de tiempo, el concepto de disimilitud es particularmente complejo debido al carácter dinámico de la serie. Las diferencias generalmente consideradas en la agrupación convencional no podrían funcionar adecuadamente con los datos dependientes del tiempo porque ignoran la relación de interdependencia entre los valores. 
+
+De esta manera, diferentes enfoques para definir una función de disimilitud entre series de tiempo han sido propuestos en la literatura pero nos centraremos en aquellas medidas asociadas a la autocorrelación (simple, e inversa), correlación cruzada y periodograma de las series (Ver: \cite{struzik1999haar};  \cite{galeano2000multivariate}; \cite{caiado2006periodogram}; \cite{chouakria2007adaptive}). Estos enfoques basados en características tienen como objetivo representar la estructura dinámica de cada serie mediante un vector de características de menor dimensión, lo que permite una reducción de dimensionalidad (las series temporales son esencialmente datos de alta dimensionalidad) y un ahorro significativo en el tiempo de cálculo, además de que nos ayudan a alcanzar el objetivo central por el que usaremos el Análisis Clúster que es el de la modelización de series de tiempo.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%El análisis de Conglomerados o Clúster es una rama de métodos que tienen el objetivo de agrupar un conjunto de objetos de tal manera que los objetos de cada grupo sean los más "similares" posible, mientras que objetos de distintos grupos sean "distintos". Una etapa fundamental de este análisis corresponde a la especificación de una medida de similitud (o disimilitud) que permita cuantificar que tan "similares" o "distintos" son los objetos analizados.
+
+\subsection{Métricas y Funciones de Disimilitud}
+
+Desde un punto de vista general el término proximidad indica el concepto de cercanía en espacio, tiempo o cualquier otro contexto. Desde un punto de vista matemático, ese término hace referencia al concepto de disimilitud o similaridad entre dos elementos. 
 Sea O un conjunto finito o infinito de elementos (individuos, estímulos sujetos u objetos) sobre los que queremos definir una proximidad.
 
 
-\begin{defic}
-Dados dos puntos $o_i, o_j \in O$ y $\delta$ es una función real de $O \times O \rightarrow \mathbb{R}$, con $\delta_{ij}=\delta(o_i,o_j).$ Se diría que $\delta$ es una disimilaridad si verifica
+\begin{defin}
+Dados dos puntos $o_i, o_j \in O$ y $\delta$ es una función real de $O \times O \rightarrow \mathbb{R}$, con $\delta_{ij}=\delta(o_i,o_j).$ Se diría que $\delta$ es una disimilitud si verifica
 \begin{itemize}
 \item $\delta_{ij}=\delta_{ji}$, $\forall i,j.$
 \item $\delta_{ii} \leq \delta_{ij}$, $\forall i,j.$
 \item $\delta_{ii}=\delta_{o}$, $\forall i.$
 \end{itemize}
-\end{defic}
-La primera condición podría eliminarse, aunque resulta necesaria si se desea comparar con una distancia. No obstante, esa condición suele violarse cuando las disimilaridades provienen de juicios emitidos por sujetos, ya que éstos no siempre califican igual al par $(i,j)$ que al par $(j,i)$. Las condiciones segunda y tercera suelen establecerse igualmente para $\delta_o=0$, aunque también es conocido que cuando a un individuo le son presentados dos estímulos idénticos, éste tiende a asignarles algún valor de disimilaridad no nulo y generalmente positivo, y además no siempre se define $\delta_o \geq 0$ 0 ya que, si por ejemplo las disimilaridades provienen de una transformación, éstas podrían ser negativas.
-\begin{defic}
-Una función real $s$ de $O \times O \rightarrow \mathbb{R}$, se dirá que es una similaridad si verifica:
-\begin{itemize}
-\item $s_{ij}=s_{ji}$, $\forall i,j.$
-\item $s_{ij} \leq s_{ii}$ $\forall i,j.$
-\item $s_{ii}=s_{o}$, $\forall i.$
-\end{itemize}
-\end{defic}
-Algunos autores consideran $s_o=0$, y además suponen que $0 \leq s_{ij} \leq 1$ ya que una similaridad es un término opuesto al de disimilaridad por lo que deberá existir alguna transformación monótona $t$ tal que $t(s)=\delta$. Una transformación de ese tipo podría ser $\delta=1-s$ si $0 \leq s \leq 1$, aunque otra utilizada en INDSCAL podría ser $\delta=-s$, sin que $s$ deba estar acotada.\\
-Puesto que la idea fundamental sobre la que se basa el MDS es la de asociar disimilaridades a distancias, hemos de verificar, entre otras, que se cumpla la desigualdad triangular. No obstante, si se cumplen los demás axiomas salvo éste, es posible transformar los datos para que ésta también sea verificada, tomando $c=\max_{i,j,h}(\delta_{hj}-\delta_{hi}-\delta_{ij})$ de forma que, $\gamma_{ii}=0$; $\gamma_{ii}=\delta_{ij}+c$, $\forall i \neq j$. \\
-Existen diferentes medidas para el cálculo de disimilaridades o similaridades entre un par de variables o individuos. Si consideramos una matriz de datos $x_{ri}$, obtenida de $n$ objetos sobre $p$ variables, algunos ejemplos de medidas son:
+\end{defin}
+
+La primera condición podría eliminarse, aunque resulta necesaria si se desea comparar con una distancia. No obstante, esa condición suele violarse cuando las disimilitud provienen de juicios emitidos por sujetos, ya que éstos no siempre califican igual al par $(i,j)$ que al par $(j,i)$. Las condiciones segunda y tercera suelen establecerse igualmente para $\delta_o=0$, aunque también es conocido que cuando a un individuo le son presentados dos estímulos idénticos, éste tiende a asignarles algún valor de disimilitud no nulo y generalmente positivo, y además no siempre se define $\delta_o \geq 0$ ya que, si por ejemplo las disimilitud provienen de una transformación, éstas podrían ser negativas.
+
+Existen diferentes medidas para el cálculo de disimilitud entre un par de variables o individuos. Si consideramos una matriz de datos $x_{ri}$, obtenida de $n$ objetos sobre $p$ variables, algunos ejemplos de medidas son:
+
 \begin{itemize}
 \item \textit{Distancia euclídea ponderada}
 $$ \delta_{rs}=\left(\displaystyle \sum_i w_i(x_{ri}-x_{si}) \right)^{1/2} $$
@@ -31,10 +40,57 @@ $$ \delta_{rs}=\left(\displaystyle \sum_i w_i(x_{ri}-x_{si}) \right)^{1/2} $$
 $$ \delta_{rs}=\left(\displaystyle \sum_i \abs{x_{ri}-x_{si}}^{\lambda}\right)^{1/\lambda}, \ \ \lambda \geq 1 $$
 \item \textit{Separación angular}
 $$ \delta_{rs}=1-\frac{\sum_i x_{ri}x_{si}}{(\sum_i x_{ri}^2 \sum_i x_{si}^2)^{1/2}} $$
-\item \emphasise{Variograma}
-$$ \delta_{rs}=\frac{\gamma_{rs}}{\sum_{r,s} \gamma_{rs} } $$
-Donde:
-$$\bar{X}_{r.}=\frac{1}{n}\sum_{i}X_{ri}$$
-$$\gamma_{rs}=\frac{1}{(n-1)}\left[\sum_{i} (X_{ri}-X_{si})^2-n(\bar{X}_{r.}-\bar{X}_{s.})^2\rigth]$$
+
 \end{itemize}
+
+
+\subsection{Métricas para Series de Tiempo}
+
+El problema de medir similitudes o diferencias entre datos asociados a series de tiempo ha sido estudiado ampliamente por autores como \cite{johnson2004multivariate}, además de \cite{galeano2000multivariate} propusieron compara las funciones de autocorrelación de las series, \cite{diggle1991nonparametric}con enfoques no paramétricos comparando el espectro de las series,  \cite{piccolo1990distance} que dió una métrica basada en modelos ARIMA, \cite{diggle1997spectral} quien desarrollo métodos basados en análisis espectral, y \cite{maharaj2000cluster} quien comparó dos series estacionarias basándose en sus parámetros autoregresivos .
+A continuación se muestran un par de ejemplos de estas métricas 
+
+\begin{itemize}
+\item  \cite{galeano2000multivariate} propone una métrica que se basa en la estimación de la función de autocorrelación de las series. Sean $(x_t)$, $(y_t)$ dos series de tiempo, y $\hat\rho =(\hat\rho_1,\hat\rho_2,...,\hat\rho_k)$ el vector de coeficientes de autocorrelación estimados hasta el retardo $k$ (que supondremos es el mayor retardo significativo). Así, se define la distancia entre las series de tiempo $x$ e $y$ como sigue.
+
+$$d_{ACF}(x,y) = \sqrt{(\hat\rho_x - \hat\rho_y)'\Omega (\hat\rho_x - \hat\rho_y)}$$
+Donde $\Omega$ es una matriz de pesos (simétrica y semidefinida positiva) usualmente se considera $\Omega=I_k$
+
+\item \cite{piccolo1990distance} define una métrica para series de tiempo que pueden representarse como un ARIMA(p,0,q) es decir, series que puedan escribirse en su forma Autoregresiva AR($\infty$) mediante el operador $\pi(L) = 1-\pi_1 L -\pi_2 L^2 - ...$. Bajo esas condiciones, se define la métrica siguiente.
+
+$$d_{PIC}(x,y)= \sqrt{\sum_{j=1}^{\infty}(\pi_{(x,j)}-\pi_{(y,j)})^2$$
+
+
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

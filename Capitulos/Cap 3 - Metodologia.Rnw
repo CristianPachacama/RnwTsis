@@ -1,16 +1,127 @@
-\chapter{Metodología}
+\chapter{Metodología} \label{cap2}
+
+\section*{Descripción General}
 
 
-El Análisis Clúster es un técnica de aprendizaje no supervisada que tiene como objetivo dividir un conjunto de objetos en grupos homogéneos (clústers). La partición se realiza de tal manera que los objetos en el mismo clúster son más similares entre sí que los objetos en diferentes grupos según un criterio definido. En muchas aplicaciones reales, el análisis de clúster debe realizarse con datos asociados a  series de tiempo. De hecho, los problemas de agrupamiento de series de tiempo surgen de manera natural en una amplia variedad de campos, incluyendo economía, finanzas, medicina, ecología, estudios ambientales, ingeniería y muchos otros. 
-Con frecuencia, la agrupación de series de tiempo desempeña un papel central en el problema estudiado. Estos argumentos motivan el creciente interés en la literatura sobre la agrupación de series de tiempo, especialmente en las últimas dos décadas, donde se ha proporcionado una gran cantidad de contribuciones sobre este tema. En \cite{liao2005clustering} se puede encontrar un excelente estudio sobre la agrupación de series de tiempo, aunque posteriormente se han realizado nuevas contribuciones significativas. Particularmente importante en la última década ha sido la explosión de documentos sobre el tema provenientes tanto de comunidades de minería de datos como de reconocimiento de patrones. \cite{fu2011review} proporciona una visión general completa y exhaustiva de las últimas orientaciones de minería de datos de series de tiempo, incluida una gama de problemas clave como representación, indexación y segmentación de series de tiempo, medidas de disimilitud, procedimientos de agrupamiento y herramientas de visualización.
 
-Una pregunta crucial en el Análisis Clúster es establecer lo que queremos decir con objetos de datos "similares", es decir, determinar una medida de similitud (o disimilitud) adecuada entre dos objetos. En el contexto específico de los datos asociados a series de tiempo, el concepto de disimilitud es particularmente complejo debido al carácter dinámico de la serie. Las diferencias generalmente consideradas en la agrupación convencional no podrían funcionar adecuadamente con los datos dependientes del tiempo porque ignoran la relación de interdependencia entre los valores. 
+\section{Elección de Métrica}
 
-De esta manera, diferentes enfoques para definir una función de disimilitud entre series de tiempo han sido propuestos en la literatura pero nos centraremos en aquellas medidas asociadas a la autocorrelación (simple, e inversa), correlación cruzada y periodograma de las series (Ver: \cite{struzik1999haar};  \cite{galeano2000multivariate}; \cite{caiado2006periodogram}; \cite{chouakria2007adaptive}). Estos enfoques basados en características tienen como objetivo representar la estructura dinámica de cada serie mediante un vector de características de menor dimensión, lo que permite una reducción de dimensionalidad (las series temporales son esencialmente datos de alta dimensionalidad) y un ahorro significativo en el tiempo de cálculo, además de que nos ayudan a alcanzar el objetivo central por el que usaremos el Análisis Clúster que es el de la modelización de series de tiempo.
+Se selecciona la métrica (en general se usa una función de disimilitud) asociada la ?Autocorrelación? (relación con sus propios retardos), ya que compara el comportamiento Temporal  de una pareja de series por lo que es útil para una posterior modelamiento (SARIMAX por ejemplo, que considera un modelo dependiente del pasado de la serie). A partir de esta pseudo-métrica se genera una matriz de distancias entre todas las estaciones de ?Vazoes?.
 
-Una vez que se determina la medida de disimilitud, se obtiene una matriz de disimilitud inicial (que contiene la disimilitud entre parejas de series), y luego se usa un algoritmo de agrupamiento convencional para formar los clústers (grupos) con las series. De hecho, la mayoría de los enfoques de agrupamiento de series de tiempo revisados por \cite{liao2005clustering} son variaciones de procedimientos generales como por ejemplo: K-Means, K-Medoids, PAM, CLARA \cite{kaufman1986clustering} o de Clúster jerárquico que utilizan una gama de disimilitudes específicamente diseñadas para tratar con series de tiempo y algunas de sus características. 
+\[
+d_{ACF}(x,y) = \sqrt{(\hat \rho_x - \hat\rho_y)'\Omega(\hat{\rho}_x-\hat{\rho}_y)}
+\]
 
-Una etapa adicional dentro del análisis clúster consiste en determinar la cantidad de clústers que es más apropiada para los datos. Idealmente, los clústers resultantes no solo deberían tener buenas propiedades estadísticas (compactas, bien separadas, conectadas y estables), sino también resultados relevantes. Se han propuesto una variedad de medidas y métodos para validar los resultados de un análisis clúster y determinar tanto el número de clústers, así como identificar qué algoritmo de agrupamiento ofrece el mejor rendimiento, algunas de estas ellas pueden encontrarse en \cite{fraley1998many}; \cite{duda2001pattern} ; \cite{salvador2004determining} ; \cite{kerr2001bootstrapping}. Esta validación puede basarse únicamente en las propiedades internas de los datos o en alguna referencia externa.
+donde $\hat{\rho}$ es el vector de coeficientes de autocorrelación estimados, mientras que $\Omega$ es una matriz de pesos usualmente $\Omega=I$ y así se obtiene la distancia Euclidea entre los coeficientes de autocorrelación, o $\Omega=[cov(\hat\rho)]^{-1}$ y en este caso se obtiene la distancia de Mahalanobis entre los coeficientes de autocorrelación.
 
-Posteriormente se procede al modelamiento SARIMAX de los caudales usando además variables micro y macro climáticas que podrían explicar de mejor manera el comportamiento de estos caudales, cabe mencionar que se modelara únicamente un caudal por cada clúster (grupo).
-El modelo SARIMAX propuesto en \cite{box2015time} es un modelo SARIMA (Seasonal Autoregressive Integrated Moving Average) que incluye variables exógenas. Es decir, compone un modelo de regresión ordinario que usa variables exógenas en el modelo SARIMA que se usa para estudiar series de tiempo estacionales.
+\section{Elección del Método de Clústerización}
+
+En esta etapa se elige una técnica de clústerización o agrupamiento que típicamente parte de una matriz de distancias entre objetos (en este caso las series de Vazoes), y considerando estas distancias agrupa estos objetos de tal manera que en cada grupo se encuentren objetos muy cercanos entre si (es decir busca un grupo homogeneo), pero distantes a objetos pertenecientes a otros grupos.
+Entre las técnicas que se consideraron tenemos al Clúster Jerárquico que genera un árbol llamado ?Dendograma? que muestra paso a paso como se forman los grupos.
+Una segunda técnica más eficiente que se considera es el algoritmo CLARA de clusterización, que es usado cuando se necesita agrupar una gran cantidad de objetos.
+
+\textbf{Observación.} La elección del número de grupos en los datos es a veces subjetiva y depende de la experiencia del investigador. Sin embargo, podemos encontrar una partición natural en el conjunto de datos mediante el llamado coeficiente de inconsistencia
+
+\begin{figure}[h]
+\caption{Mapa de Clústers}
+\includegraphics[width=15cm]{Cap3-Metodologia/Capture1.png}
+\label{fig:mapa_clust}
+\centering
+\end{figure}
+
+
+\begin{figure}[h]
+\caption{Series del Clúster 1}
+\includegraphics[width=15cm]{Cap3-Metodologia/Capture2.png}
+\label{fig:clust1}
+\centering
+\end{figure}
+
+\section{Análisis de Componente Principales Funcional}
+
+El ACP típico se encarga de reducir la dimensión de un conjunto de datos mediante el cálculo de un grupo mucho menor de variables ortogonales que mejor representan el conjunto original de datos.
+Análogamente el análisis de componentes principales funcionales (ACPF) es una extensión del ACP clásico en el que las componentes principales están representadas por funciones y no por vectores (Ramsay & Sylverman, 2005). La filosofía principal del análisis de datos funcionales es la creencia de que la mejor fuente de información es la función observada y no un arreglo de números. 
+Así podemos usar todas las series de Vazoes de un clúster para hallar esta función (o funciones) que representan el comportamiento de todo el clúster.
+
+\begin{figure}[h]
+\caption{Análisis de Componentes Principales Funcional}
+\includegraphics[width=15cm]{Cap3-Metodologia/ACPF.png}
+\label{fig:acpf1}
+\centering
+\end{figure}
+
+
+\section{Limpieza de Datos de Clima}
+
+Un punto importante previo al modelamiento, es la limpieza de los datos. En este caso contamos con una alta presencia de valores perdidos especialmente en las series asociadas a variables Climáticas. Por lo que consideramos retirar todas aquellas series que contengan más del 10% de valores perdidos. 
+Mientras que para las restantes, diseñamos un algoritmo de corrección de los valores perdidos de las series. Dicho sea de paso que estas series tienen la peculiaridad de ser Estacionales. 
+
+Pues bien aplicando el algoritmo de de Limpieza de Datos expuesto en el capítulo anterior obtenemos los siguiente
+
+\begin{figure}[h]
+\caption{Serie de Tiempo Climática}
+\includegraphics[width=10cm]{Cap3-Metodologia/limpieza.png}
+\label{fig:acpf1}
+\centering
+\end{figure}
+
+\begin{figure}[h]
+\caption{Serie de Tiempo Climática Corregida}
+\includegraphics[width=10cm]{Cap3-Metodologia/limpieza2.png}
+\label{fig:acpf1}
+\centering
+\end{figure}
+
+\section{Agrupar datos de Vazoes y Clima}
+
+Una vez corregidas las series climáticas, el criterio para agrupar las series climáticas a series de Vazoes de determinado clúster es el siguiente:  Para cada serie de Vazoe del clúster se busca la serie climática de la estación más cercana, al final tenemos un listado de estaciones climáticas por clúster (donde podría esta repetida una o más estaciones pero luego se quitan las estaciones repetidas). 
+
+Finalmete esta lista de estaciones climáticas (y las 6 variables que la conforman) constituyen las variables explicativas del modelo que plantearemos adelante para poder explicar el comportamiento del Flujo (Vazoe) de cada Clúster, es decir de la serie Vazoe que representa el clúster obtenida del ACP-Funcional.
+
+\begin{figure}[h]
+\caption{Serie de Tiempo Climática Corregida}
+\includegraphics[width=16cm]{Cap3-Metodologia/vazclim.png}
+\label{fig:acpf1}
+\centering
+\end{figure}
+
+
+\section{Modelamiento de cada clúster}
+
+Finalmente formulamos un modelo SARIMAX, mismo que considera la parte estacional de los Flujos (Vazoes) representantes de cada Clúster, y además los relaciona con las series climáticas asociadas a dicho clúster.
+El modelo propuesto es SARIMAX$(p,0,q)(P,D,Q)_s$
+\[
+\varphi_p(L)\Psi_P(L^s)\bigtriangledown _s^D V_t = \sum_{k=1}^{w}\beta_k C_{kt} + \phi_q(L) \Phi_Q(L^s)e_t
+\]
+Donde $V_t$ es el caudal estimado del clúster en el tiempo t, $C_{kt}$ son las variables de Clima de la estación $k$ en el tiempo $t$.
+
+
+
+
+%%
+Una modificación del modelo propuesto es usar un SARIMAX$(p,0,q)(P,D,Q)_s$, pero modelando está vez los Logaritmos tanto de Vazoes como de  las Series Climáticas.
+ \[
+\varphi_p(L)\Psi_P(L^s)\bigtriangledown _s^D \log(V_t) = \sum_{k=1}^{w}\beta_k \log(C_{kt}) + \phi_q(L) \Phi_Q(L^s)e_t
+\]
+
+\begin{figure}[h]
+\caption{Ajuste y Predicción del Modelo SARIMAX}
+\includegraphics[width=16cm]{Cap3-Metodologia/sarimax.png}
+\label{fig:sarimax}
+\centering
+\end{figure}
+
+
+\begin{figure}[h]
+\caption{Residuos del Modelo SARIMAX}
+\includegraphics[width=16cm]{Cap3-Metodologia/sarimax_resid.png}
+\label{fig:sarimax_resid}
+\centering
+\end{figure}
+
+
+
+
+
+
+

@@ -1,7 +1,53 @@
-\chapter{Introducción}
+\chapter{Introducción}\label{cap1}
 
 
 Brasil tiene uno de los sistemas hidrológicos más complejos, diversos y extensos del mundo. A diferencia de la gran mayoría de los países desarrollados, Brasil tiene en los ríos su principal fuente de generación de electricidad, ocupando el tercer lugar dentro de los más grandes productores hidroeléctricos del mundo. Debido a la importancia del sector hidroeléctrico buscar formas de facilitar y mejorar el modelamiento de datos asociados a este sector es un problema prioritario. Problema provocado por la dificultad que supone lidiar con la enorme cantidad de datos (accesibles desde la web de instituciones como ANA, ONS, NOAA, CPTEC, etc.) asociados a mediciones de Caudales de los ríos que componen este sistema, que cuenta con alrededor de 150 estaciones de medición repartidas en todo Brasil. Dichos datos se presentan en forma de Series de Tiempo que posee tres características que dificultan su análisis, la primera es que estas series de tiempo poseen observaciones diarias de los caudales en un periodo de tiempo de alrededor de 30 años, es decir, son series muy extensas. La segunda característica es que estas series de tiempo son estacionales, y por último existe evidencia de que el ruido o error asociado a estas series no se distribuye normalmente, sino que su distribución posee colas más pesadas como las analizadas en teoría de valores extremos. En ese contexto, notamos que es posible disminuir la dimensión del problema a través la identificación de clústers o zonas representativas (no necesariamente geográficas) que resuman el comportamiento temporal que poseen los caudales de los ríos. Esto en términos de modelamiento esto se traduce en pasar del problema de modelar el nivel de caudal en todas las 150 estaciones, al problema de modelar únicamente 1 estación por cada clúster.
 
 
-Ya que el problema se basa en identificar grupos de ríos cuyos Caudales se comportan de manera similar en el tiempo, se propone la utilización de el "Análisis Clúster de Series de Tiempo", que es una técnica de agrupamiento que considera una función de disimilitud" entre las series de tiempo (que mide que tan distintas son un par de series) y a partir de ella crea grupos de series, cada grupo contiene series de tiempo parecidas". Al elegir adecuadamente la función de disimilitud (diseñada para series de tiempo) es posible agrupar a los ríos en grupos basados en el comportamiento temporal de sus caudales. Esto con la finalidad de lidiar con la complejidad que supone analizar y modelar esta enorme cantidad de series de tiempo de caudales, pasando de analizar alrededor de 150 series a unas pocas (una serie por Clúster), sin dejar de lado la estructura y comportamiento estacional de cada una de ellas, partiendo de una adecuada elección de la función de disimilitud. Hay que destacar que el modelamiento de caudales juega un rol trascendental en la creación de políticas que adopta sector energético de Brasil, que como mencionamos anteriormente está alimentado en su mayoría por el sector hidroeléctrico en donde el análisis que planteamos permitiría profundizar en la planificación de las operaciones de plantas hidroeléctricas que depende directamente del comportamiento temporal de los ríos que las alimentan, esta planificación podría evitar por ejemplo eventos de déficit energético provocados por una deciencia estructural de la disponibilidad de energía, que a la larga tiene impactos económicos y sociales mayores que los cortes de energía.
+Ya que el problema se basa en identificar grupos de ríos cuyos Caudales se comportan de manera similar en el tiempo, se propone la utilización de el "Análisis Clúster de Series de Tiempo", que es una técnica de agrupamiento que considera una función de disimilitud" entre las series de tiempo (que mide que tan distintas son un par de series) y a partir de ella crea grupos de series, cada grupo contiene series de tiempo parecidas". Al elegir adecuadamente la función de disimilitud (diseñada para series de tiempo) es posible agrupar a los ríos en grupos basados en el comportamiento temporal de sus caudales. Esto con la finalidad de lidiar con la complejidad que supone analizar y modelar esta enorme cantidad de series de tiempo de caudales, pasando de analizar alrededor de 150 series a unas pocas (una serie por Clúster), sin dejar de lado la estructura y comportamiento estacional de cada una de ellas, partiendo de una adecuada elección de la función de disimilitud. Hay que destacar que el modelamiento de caudales juega un rol trascendental en la creación de políticas que adopta sector energético de Brasil, que como mencionamos anteriormente está alimentado en su mayoría por el sector hidroeléctrico en donde el análisis que planteamos permitiría profundizar en la planificación de las operaciones de plantas hidroeléctricas que depende directamente del comportamiento temporal de los ríos que las alimentan, esta planificación podría evitar por ejemplo eventos de déficit energético provocados por una deciencia estructural de la disponibilidad de energía, que a la larga tiene impacto económico y social mayor que los cortes de energía.
+
+\section{Descripción de los Datos}
+
+Contamos con una base de datos de 31588 observaciones diarias de 2383 variables, las variables se encuentran clasificadas en 5 Tipos:
+
+\begin{enumerate}
+
+\item Primero las variables correspondientes a Caudales (Vazoes), mismas que corresponden a series de tiempo de 150 estaciones georeferenciadas.
+
+\item Además, tenemos variables referentes a Clima. Contamos con observaciones de 8 variables en 260 estaciones. Las variables son las siguientes:
+
+\begin{itemize}
+
+\item Evaporacao\_ Piche
+\item Insolacao
+\item Precipitacao\_ 12H
+\item Temp\_ Comp\_ Media
+\item TempMaxima
+\item TempMinima\_ 12H
+\item Umidade\_ Relativa\_ Media
+\item Velocidade\_ do\_ Vento\_ Media
+
+\end{itemize}
+
+\item Contamos además con las variables globales que corresponden a 13 índices, que miden fenómenos meteorológicos y climatológicos a nivel mundial
+
+\begin{itemize}
+\item AAO: Antartic Oscillation Index
+\item AO: Artic Oscillation Index
+\item MJO-RMM1: Oscilacao Madden-Jullian RMM1
+\item MJO-RMM2: Oscilacao Madden-Jullian RMM2
+\item NAO: North Atlantic Oscillation Index
+\item Nino3: El Niño 3
+\item Nino4: El Niño 4
+\item Nino12: El Niño 1+2
+\item Nino34: El Niño 3.4
+\item SOI: Southern Oscillation Index
+\item SOI\_ DAR: Southern Oscillation Index
+\item SOI\_ TAH: Southern Oscillation Index
+\item 
+TSI: Total solar irradiance
+
+\end{itemize}
+
+\end{enumerate}
+

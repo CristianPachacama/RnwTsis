@@ -1,34 +1,59 @@
 \section{Tratamiento de Valores perdidos}
 
-En este capítulo ilustraremos una propuesta para el tratamiento de valores perdidos en series de tiempo estacionales. Para ello consideremos una serie de tiempo $(X_t)_{t\in T}$, de la que conocemos las observaciones 
-$$x_1,x_2,...,x_{j-1}, x_j, x_k, x_{k+1},...,x_n$$
+En este capítulo ilustraremos una propuesta para el tratamiento de valores perdidos en series de tiempo estacionales. Para ello consideremos una serie de tiempo $(Y_t)$, de la que conocemos las observaciones 
+$$y_1,y_2,...,y_{j-1}, y_j, y_k, y_{k+1},...,y_n$$
 
-donde $1 < j < k < n$. Recordemos que la descomposición STL-Loess permité descomponer aditivamente la serie en sus componentes de tendencia y estacionalidad inclusive en aquellos valores de t para los que no conocemos $x_t$ , es decir, para $t=j+1, j+2, ..., k-1$. 
+donde $1 < j < k < n$. Recordemos que la descomposición STL-Loess permité descomponer aditivamente la serie en sus componentes de tendencia y estacionalidad inclusive en aquellos valores de t para los que no conocemos $y_t$ , es decir, para $t=j+1, j+2, ..., k-1$. 
 
-Luego de descomoponer $X_t$ obtenemos su tendencia $D_t$, estacionalidad $S_t$ (para $t=1,2,...,n$), y el residuo $U_t$ (para $t=1,2,...,j,k,...,n$). Además estás series cumplen la relación siguiente.
+Luego de descomoponer $Y_t$ obtenemos su tendencia $T_t$, estacionalidad $S_t$ (para $t=1,2,...,n$), y el residuo $U_t$ (para $t=1,2,...,j,k,...,n$). Además estás series cumplen la relación siguiente.
 
 
 \begin{equation}
 \label{eq:stl_descomp}
-X_t = D_t + S_t + U_t
+Y_t = T_t + S_t + R_t
 \end{equation}
 
-Ilustramos lo antes mencionado en el siguiente gráfico ( \ref{fig:stl_descomp} ) , que corresponde a la descomposición STL-Loess de una serie de datos mensuales de precipitación (lluvias) medidos en cierta zona de Brasil, está serie tiene estacionalidad anual (12 meses); notemos que es necesario fijar los parámetros de la descomposición adecuadamente ya que están asociados al número de retardos considerados al estimar tanto la componente estacional como la tendencia. 
+Ilustramos lo antes mencionado en el siguiente gráfico (Ver  \ref{fig:stl_descomp} ) , que corresponde a la descomposición STL-Loess de una serie de datos mensuales de precipitación (lluvias) medidos en cierta zona de Brasil, está serie tiene estacionalidad anual (12 meses); notemos que es necesario fijar los parámetros de la descomposición adecuadamente ya que están asociados al número de retardos considerados al estimar tanto la componente estacional como la tendencia. 
 
 El gráfico muestra en la primera fila la serie climática, en segundo lugar muestra su componente estacional, en tercera fila encontramos su componente de tendencia, y finalmente el residuo. Como podemos notar las componentes de tendencia y estacionalidad están definidas en todo el dominio de tiempo.
 
 \begin{figure}[h]
-\caption{Descomposición STL-Loess}
-\includegraphics[width=15cm]{Imagenes/Cap2-Stl-Loess.png}
+\caption{Descomposición STL-Loess de Serie}
+\includegraphics[width=15cm]{Cap2-Stl-Loess.png}
 \label{fig:stl_descomp}
 \centering
 \end{figure}
 
-Pues bien, notemos que bastaría conocer los valores de $U_t$ en para todo $t$ e inmediatamente conoceríamos los de $X_t$ por la ecuación \eqref{eq:stl_descomp}. Así, bastaría simular los valores perdidos de $U_t$ que tiende a comportarse como un proceso estacionario, suponiendo que se especificaron bien los parámetros de la descomposición STL. 
-Una forma simple de simular dichos datos, es partiendo de la función de distribución empírica de los Residuos 
-$$\hat{F}_0(u):=\frac{1}{n}\sum_{i=1}^{n} I_{(x_i\leq u)} $$
+Notemos que bastaría conocer los valores de $R_t$ en para todo $t$ e inmediatamente conoceríamos los de $Y_t$ gracias a la ecuación \eqref{eq:stl_descomp}. 
 
-una vez calculada $\hat{F}_0(u)$ usamos el algoritmo siguiente.
+Así, proponemos simular los valores perdidos de $R_t$. Una forma simple de simular dichos valores, es usando el método simulación de la Transformada Inversa (Ver \cite{ross2006simulation} ) partiendo de la función de distribución empírica de los Residuos. Esto debido a que los residuos tienden a comportarse como un proceso estacionario, suponiendo que se especificaron bien los parámetros de la descomposición STL.
+
+
+Pues bien, simulamos los valores perdidos de los residuos usando el siguiente algoritmo.
+
+\begin{enumerate}
+\item Primero calculamos la función de distribución empírica $\hat{F}_0(u)$ de los residuos de la descomposición. 
+
+$$\hat{F}_0(u):=\frac{1}{n}\sum_{i=1}^{n} I_{(y_i\leq u)} $$
+
+
+\item Simular $u\sim U[0,1]$
+\item Calcular $y := \hat{F}_0^{-1}(u) = inf\{ t\in \mathbb{R}: u\leq \hat{F}_0(t) \} $
+
+\end{enumerate}
+
+De esta manera $y$ sigue tiene distribución $\hat F_0$ (la distribución de los Residuos)
+
+Volviendo al ejemplo antes mostrado (Ver \ref{fig:stl_descomp} ), luego de simular los valores perdidos de $R_t$ obtenemos la serie completa $Y_t$ como se puede observar en  (\ref{fig:stl_descomp2})
+
+\begin{figure}[h]
+\caption{Serie Corregida}
+\includegraphics[width=15cm]{Cap2-MarcoTeorico/Cap2-Stl-Loess2.png}
+\label{fig:stl_descomp2}
+\centering
+\end{figure}
+
+
 
 
 

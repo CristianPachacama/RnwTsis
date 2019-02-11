@@ -1,0 +1,24 @@
+\section{Modelos SARIMAX}
+
+
+El modelo SARIMAX es una extensión del modelo SARIMA (Seasonal Autoregressive Integrated Moving Average), mejorado con la capacidad de integrar variables exógenas (explicativas) para aumentar su rendimiento de pronóstico. Esta versión multivariable del modelo SARIMA$(p,d,q)(P,D,Q)_s$, llamada ARIMA estacional con factor exógeno (es decir, SARIMAX), que se expresa formalmente como:
+\[
+\varphi_p (B)= \Phi_P(B^s) \triangledown^d \triangledown _s^Dy_t = \sum_{k=1}^{K}\beta_k x_t^{(k)} + \theta_q (B) \Theta_Q(B^s)\varepsilon_t
+\]
+
+Donde:
+\begin{itemize}
+
+\item $y_t$ es la variable de estudio,
+\item $x_t^{(k)}$ es la k-ésima variable exógena,
+\item $B$ es el operador de retardos ($B^k y_t = y_{t-k}$),
+\item $\varphi_p (B)$ es el polinomio AR de retardos de orden $p$,
+\item $\theta_q (B)$ es el polinomio MA de retardos de orden $p$,
+\item $\Phi_P (B)$ es el polinomio AR de retardos de orden $p$,
+\item $\Theta_Q (B)$ es el polinomio MA de retardos de orden $p$,
+\item $\triangledown^d:=(1-B)^d$ es el operador de diferenciación de orden $d$
+\item $\triangledown _s^D:=(1-B^s)^D$ es el operador de diferenciación estacional de orden $D$ (y estacionalidad $s$) .
+
+
+\end{itemize}
+

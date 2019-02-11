@@ -3,8 +3,8 @@
 % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 \documentclass[12pt,oneside]{book}
 
-% \usepackage{FormatoEPN/FormatoEpn}
 \usepackage{FormatoEpn}
+
 
 %\usepackage{showlabels}
 
@@ -12,11 +12,16 @@
 \usepackage{enumitem}
 
 \usepackage{amsmath,amssymb,amsthm}
+\theoremstyle{definition} %
+\newtheorem{defin}{DefiniciÛn}[section]
+
 \usepackage{xcolor}
 \usepackage{graphicx}
+\graphicspath{ {./Imagenes/} }
+
 \usepackage{cite}
-\usepackage{hyperref}
-% \input{Comandos Extra/comandos.tex}
+\usepackage[colorlinks]{hyperref}
+
 \input{comandos.tex}
 
 \titulo{An·lisis Cl˙ster para series de tiempo estacionales y modelizaciÛn de caudales de rÌos del Brasil.}
@@ -93,7 +98,7 @@ opts_chunk$set(echo=FALSE,warning=FALSE,error = F,message = F)
 @
 
 % 2.6 ModelizaciÛn SARIMAX
-<<sarimax, child='Capitulos/Cap 2 - Marco Teorico/S6 - Modelizacion SARIMAX.Rnw'>>=
+<<sarimax, child='Capitulos/Cap 2 - Marco Teorico/S6 - SARIMAX.Rnw'>>=
 @
 
 % ---------------------------------------------------------
@@ -106,13 +111,26 @@ opts_chunk$set(echo=FALSE,warning=FALSE,error = F,message = F)
 <<conclusiones, child='Capitulos/Cap 4 - Conclusiones.Rnw'>>=
 @
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%   APENDICES     %%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
+<<apendice1, child='Apendices/A1 - Apendice1.Rnw'>>=
+@
 
-\nocite{*}
+<<apendice2, child='Apendices/A2 - Apendice2.Rnw'>>=
+@
 
-\bibliographystyle{siam}
+<<apendice3, child='Apendices/A3 - Apendice3.Rnw'>>=
+@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \nocite{*}
+\cleardoublepage
+\bibliographystyle{apalike}
 \bibliography{Bibliografia/bibliografia}
+
 \addcontentsline{toc}{chapter}{BibliografÌa}
 
 
@@ -123,124 +141,3 @@ opts_chunk$set(echo=FALSE,warning=FALSE,error = F,message = F)
 
 \end{document}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% \begin{document}
-
-
-% \frontmatter
-% \portadilla
-% \declaracion
-% \certificacion
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%     AGRADECIMIENTOS    %%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \begin{agradecimiento}
-% 
-% A mi familia, ya que su cari√±o y apoyo me llevaron a donde ahora estoy.  
-% A mis mejores amigos Miguel, Rubi, Luis y Pablo, por brindarme su amistad y tan gratos momentos.
-% 
-% A mi tutora Adriana por ser una gu√≠a y apoyarme desde el primer momento a alcanzar esta meta, gracias por depositar su confianza en mi.
-% A los profesores Erwin Jimenez, y de manera especial a Juan Carlos Trujillo quienes hicieron nacer en mi la pasi√≥n por la Matem√°tica, pasi√≥n que espero inspirar a m√°s generaciones de estudiantes. 
-% 
-% Finalmente, a grandes matem√°ticos de la historia como George Cantor,  Sime√≥n Poisson , Abraham Wald, y Karl Pearson, cuyo trabajo me inspir√≥ a profundizar en el conocimiento de esta bella ciencia.
-% 
-% 
-% \end{agradecimiento}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%       DEDICATORIA      %%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \begin{dedicatoria}
-% A mis padres Magdalena y Lucio, por su incondicional amor, sus sabios consejos y su paciencia, siempre lo tendr√© presente. A Isabel por su apoyo incondicional, y por aparecer en el momento exacto en mi vida para llenarla de felicidad. A Miguel, Rubi, Pablo y Luis por brindarme su sincera amistad.
-% 
-% \end{dedicatoria}
-
-
-% \tableofcontents
-% \listoffigures
-% \listoftables
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%         ABSTRACT       %%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \include{Capitulos/0Resumen}
-
-
-% \mainmatter
-% \addtolength{\abovedisplayskip}{-1mm}
-% \addtolength{\belowdisplayskip}{-1mm}
-%\include{Capitulos/CapituloUNO}
-
-
-
-\include{Capitulos/1Introduccion}
-
-
-
-\include{Capitulos/2MarcoTeorico}
-
-
-
-\include{Capitulos/3Metodologia}
-
-
-
-\include{Capitulos/conclusiones}
-
-\appendix
-\include{Apendice/1Apend}
-
-
-
-
-
-\nocite{*}
-
-\bibliographystyle{siam}
-\bibliography{bibTesis}
-\addcontentsline{toc}{chapter}{Bibliograf√≠a}
-
-
-\end{document} 

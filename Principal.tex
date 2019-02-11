@@ -53,8 +53,8 @@
 
 \usepackage{alltt}
 
-% \usepackage{FormatoEPN/FormatoEpn}
 \usepackage{FormatoEpn}
+
 
 %\usepackage{showlabels}
 
@@ -62,11 +62,16 @@
 \usepackage{enumitem}
 
 \usepackage{amsmath,amssymb,amsthm}
+\theoremstyle{definition} %
+\newtheorem{defin}{Definición}[section]
+
 \usepackage{xcolor}
 \usepackage{graphicx}
+\graphicspath{ {./Imagenes/} }
+
 \usepackage{cite}
-\usepackage{hyperref}
-% \input{Comandos Extra/comandos.tex}
+\usepackage[colorlinks]{hyperref}
+
 \input{comandos.tex}
 
 \titulo{Análisis Clúster para series de tiempo estacionales y modelización de caudales de ríos del Brasil.}
@@ -138,17 +143,50 @@ A mis padres Magdalena y Lucio, por su incondicional amor, sus sabios consejos y
 
 \chapter*{Resumen}
 %\onehalfspacing
+
 \addcontentsline{toc}{chapter}{Resumen}
+%Descripción General
+En el presente trabajo se aborda la aplicación del Análisis Clúster para Series de Tiempo orientado al modelamiento de caudales de los principales ríos de Brasil, que se midieron en 150 estaciones repartidas en los mismos, esto a partir de variables climáticas y la combinación de técnicas de modelamiento como Análisis de Componentes Principales Funcional (ACPF), SARIMAX y STL-Loess.
 
-En el presente trabajo se utilizará el Análisis Clúster para agrupar estaciones (asociadas a ríos en Brasil), basándonos en el comportamiento temporal del caudal de los ríos que se mide en dichas estaciones, y posteriormente modelar los caudales (1 modelo por clúster) usando variables micro y macro climáticas.
+%Descripción Específica
+Específicamente lo que se hace es crear un número pequeño de clústers (de 2 a 4 clústers) a partir de las 150 estaciones (donde se midieron los caudales), donde cada grupo contendrá a estaciones en la que sus caudales posean un comportamiento temporal lo más similar posible, luego para cada uno de estos clústers, mediante el uso de ACPF, hallaremos una sola serie de tiempo que resuma el comportamiento de los caudales del clúster. Finalmente se modela la serie de tiempo de cada clúster a partir de variables climáticas, usándolas como variables explicativas en el marco del modelamiento SARIMAX.
 
-\textbf{Palabras clave:} Análisis Clúster para Series de Tiempo, descomposición STL, SARIMAX, Análisis de Componentes Principales Funcional.
+%Resultados Concretos y valores
+Mostraremos después las ventajas y la eficiencia de modelar una enorme cantidad de series de tiempo con el uso de estás técnicas, esto debido a que el modelo que explica cada clúster puede ser extendido (usando los mismos retardos y variables explicativas) a cada una de las series de tiempo que lo componen. Realizamos estudios comparativos entre un modelo (SARIMAX) individual para un caudal específico y el modelo del clúster al que pertenece, obteniendo resultados similares en cuanto a predictibilidad. Donde se obtuvo para el modelo individual un Error Cuadrático Medio (RMSE) del 0.3$\%$ y un AIC de $-652.21$ mientras que para el modelo del clúster se obtuvo un RMSE de 0.4$\%$,y un AIC de $-763.23$ .
+
+%Significado de Resultados
+Así mostramos que conseguimos pasar del problema de modelar 150 series de tiempo, a modelar las series de tiempo de unos cuantos clústers.
+
+
+\vspace{5mm}
+
+\textbf{Palabras clave:} Análisis Clúster para Series de Tiempo, descomposición STL-Loess,SARIMAX, Análisis de Componentes Principales Funcional.
+
+
+
+
+
 
 \chapter*{Abstract}
 %\onehalfspacing
 \addcontentsline{toc}{chapter}{Abstract}
 
-\textbf{Keywords:}  HHHH
+%General Description
+This paper deals with the application of the Cluster Analysis for Time Series oriented to the modeling of flows of the main rivers of Brazil, which were measured in 150 stations distributed in them, this from climatic variables and the combination of techniques of modeling as Principal Functional Components Analysis (FPCA), SARIMAX and STL-Loess.
+
+% Specific Description
+Specifically what is done is to create a small number of clusters (from 2 to 4 clusters) from the 150 stations (where the flows were measured), where each group will contain stations in which their flows have a temporary behavior similar possible, then for each of these clusters, through the use of ACPF, we will find a single time series that summarizes the behavior of the flows of the cluster. Finally, the time series of each cluster is modeled from climatic variables, using them as explanatory variables in the SARIMAX modeling framework.
+
+% Concrete results and values
+We will show later the advantages and the efficiency of modeling a huge amount of time series with the use of these techniques, this because the model that explains each cluster can be extended (using the same delays and explanatory variables) to each of the time series that compose it. We perform comparative studies between an individual model (SARIMAX) for a specific flow and the model of the cluster to which it belongs, obtaining similar results in terms of predictability. Where an Average Quadratic Error (RMSE) of 0.3 $ \% $ and an AIC of $ -652.21 $ was obtained for the individual model, while for the cluster model an RMSE of 0.4 $ \% $ was obtained, and an AIC of $ -763.23 $.
+
+%Meaning Results
+Thus we show that we managed to move from the problem of modeling 150 time series, to modeling the time series of a few clusters.
+
+
+\vspace{5mm}
+
+\textbf{Keywords:}  Time Series Cluster Analysis, STL-Loess decomposition, Functional Principal Component Analysis
 
 \mainmatter
 \addtolength{\abovedisplayskip}{-1mm}
@@ -156,13 +194,59 @@ En el presente trabajo se utilizará el Análisis Clúster para agrupar estaciones 
 
 % Introduccion
 
-\chapter{Introducción}
+\chapter{Introducción}\label{cap1}
 
 
 Brasil tiene uno de los sistemas hidrológicos más complejos, diversos y extensos del mundo. A diferencia de la gran mayoría de los países desarrollados, Brasil tiene en los ríos su principal fuente de generación de electricidad, ocupando el tercer lugar dentro de los más grandes productores hidroeléctricos del mundo. Debido a la importancia del sector hidroeléctrico buscar formas de facilitar y mejorar el modelamiento de datos asociados a este sector es un problema prioritario. Problema provocado por la dificultad que supone lidiar con la enorme cantidad de datos (accesibles desde la web de instituciones como ANA, ONS, NOAA, CPTEC, etc.) asociados a mediciones de Caudales de los ríos que componen este sistema, que cuenta con alrededor de 150 estaciones de medición repartidas en todo Brasil. Dichos datos se presentan en forma de Series de Tiempo que posee tres características que dificultan su análisis, la primera es que estas series de tiempo poseen observaciones diarias de los caudales en un periodo de tiempo de alrededor de 30 años, es decir, son series muy extensas. La segunda característica es que estas series de tiempo son estacionales, y por último existe evidencia de que el ruido o error asociado a estas series no se distribuye normalmente, sino que su distribución posee colas más pesadas como las analizadas en teoría de valores extremos. En ese contexto, notamos que es posible disminuir la dimensión del problema a través la identificación de clústers o zonas representativas (no necesariamente geográficas) que resuman el comportamiento temporal que poseen los caudales de los ríos. Esto en términos de modelamiento esto se traduce en pasar del problema de modelar el nivel de caudal en todas las 150 estaciones, al problema de modelar únicamente 1 estación por cada clúster.
 
 
-Ya que el problema se basa en identificar grupos de ríos cuyos Caudales se comportan de manera similar en el tiempo, se propone la utilización de el "Análisis Clúster de Series de Tiempo", que es una técnica de agrupamiento que considera una función de disimilitud" entre las series de tiempo (que mide que tan distintas son un par de series) y a partir de ella crea grupos de series, cada grupo contiene series de tiempo parecidas". Al elegir adecuadamente la función de disimilitud (diseñada para series de tiempo) es posible agrupar a los ríos en grupos basados en el comportamiento temporal de sus caudales. Esto con la finalidad de lidiar con la complejidad que supone analizar y modelar esta enorme cantidad de series de tiempo de caudales, pasando de analizar alrededor de 150 series a unas pocas (una serie por Clúster), sin dejar de lado la estructura y comportamiento estacional de cada una de ellas, partiendo de una adecuada elección de la función de disimilitud. Hay que destacar que el modelamiento de caudales juega un rol trascendental en la creación de políticas que adopta sector energético de Brasil, que como mencionamos anteriormente está alimentado en su mayoría por el sector hidroeléctrico en donde el análisis que planteamos permitiría profundizar en la planificación de las operaciones de plantas hidroeléctricas que depende directamente del comportamiento temporal de los ríos que las alimentan, esta planificación podría evitar por ejemplo eventos de déficit energético provocados por una deciencia estructural de la disponibilidad de energía, que a la larga tiene impactos económicos y sociales mayores que los cortes de energía.
+Ya que el problema se basa en identificar grupos de ríos cuyos Caudales se comportan de manera similar en el tiempo, se propone la utilización de el "Análisis Clúster de Series de Tiempo", que es una técnica de agrupamiento que considera una función de disimilitud" entre las series de tiempo (que mide que tan distintas son un par de series) y a partir de ella crea grupos de series, cada grupo contiene series de tiempo parecidas". Al elegir adecuadamente la función de disimilitud (diseñada para series de tiempo) es posible agrupar a los ríos en grupos basados en el comportamiento temporal de sus caudales. Esto con la finalidad de lidiar con la complejidad que supone analizar y modelar esta enorme cantidad de series de tiempo de caudales, pasando de analizar alrededor de 150 series a unas pocas (una serie por Clúster), sin dejar de lado la estructura y comportamiento estacional de cada una de ellas, partiendo de una adecuada elección de la función de disimilitud. Hay que destacar que el modelamiento de caudales juega un rol trascendental en la creación de políticas que adopta sector energético de Brasil, que como mencionamos anteriormente está alimentado en su mayoría por el sector hidroeléctrico en donde el análisis que planteamos permitiría profundizar en la planificación de las operaciones de plantas hidroeléctricas que depende directamente del comportamiento temporal de los ríos que las alimentan, esta planificación podría evitar por ejemplo eventos de déficit energético provocados por una deciencia estructural de la disponibilidad de energía, que a la larga tiene impacto económico y social mayor que los cortes de energía.
+
+\section{Descripción de los Datos}
+
+Contamos con una base de datos de 31588 observaciones diarias de 2383 variables, las variables se encuentran clasificadas en 5 Tipos:
+
+\begin{enumerate}
+
+\item Primero las variables correspondientes a Caudales (Vazoes), mismas que corresponden a series de tiempo de 150 estaciones georeferenciadas.
+
+\item Además, tenemos variables referentes a Clima. Contamos con observaciones de 8 variables en 260 estaciones. Las variables son las siguientes:
+
+\begin{itemize}
+
+\item Evaporacao\_ Piche
+\item Insolacao
+\item Precipitacao\_ 12H
+\item Temp\_ Comp\_ Media
+\item TempMaxima
+\item TempMinima\_ 12H
+\item Umidade\_ Relativa\_ Media
+\item Velocidade\_ do\_ Vento\_ Media
+
+\end{itemize}
+
+\item Contamos además con las variables globales que corresponden a 13 índices, que miden fenómenos meteorológicos y climatológicos a nivel mundial
+
+\begin{itemize}
+\item AAO: Antartic Oscillation Index
+\item AO: Artic Oscillation Index
+\item MJO-RMM1: Oscilacao Madden-Jullian RMM1
+\item MJO-RMM2: Oscilacao Madden-Jullian RMM2
+\item NAO: North Atlantic Oscillation Index
+\item Nino3: El Niño 3
+\item Nino4: El Niño 4
+\item Nino12: El Niño 1+2
+\item Nino34: El Niño 3.4
+\item SOI: Southern Oscillation Index
+\item SOI\_ DAR: Southern Oscillation Index
+\item SOI\_ TAH: Southern Oscillation Index
+\item 
+TSI: Total solar irradiance
+
+\end{itemize}
+
+\end{enumerate}
+
 
 %Capitulo2: Marco Teorico ---------------------------------
 \chapter{Marco Teórico}
@@ -170,41 +254,214 @@ Ya que el problema se basa en identificar grupos de ríos cuyos Caudales se compo
 
 \section{Descomposición STL - Loess}
 
-STL es un procedimiento de filtrado que permite descomponer una serie de tiempo en sus componentes estacional, tendencia y Residuo. STL tiene un diseño simple que consiste en una secuencia de aplicaciones del Loess Smoother; la simplicidad permite el análisis de las propiedades del procedimiento y permite un cálculo rápido, incluso para series de tiempo muy largas y grandes cantidades de tendencia y suavizado estacional. Otras características de STL son la especificación de cantidades de suavizado estacional y de tendencias que varían, de manera casi continua, desde una cantidad muy pequeña de suavizado hasta una cantidad muy grande; estimaciones robustas de la tendencia y los componentes estacionales que no están distorsionados por un comportamiento aberrante en los datos; especificación del período de componente estacional a cualquier múltiplo entero del intervalo de muestreo de tiempo mayor que uno; y la capacidad de descomponer series de tiempo con valores perdidos.
+STL es un procedimiento de filtrado propuesto en \cite{cleveland1990stl}, sque permite descomponer una serie de tiempo en sus componentes estacional, tendencia y Residuo. STL tiene un diseño simple que consiste en una secuencia de aplicaciones del Loess Smoother; la simplicidad permite el análisis de las propiedades del procedimiento y permite un cálculo rápido, incluso para series de tiempo muy largas y grandes cantidades de tendencia y suavizado estacional. Otras características de STL son la especificación de cantidades de suavizado estacional y de tendencias que varían, de manera casi continua, desde una cantidad muy pequeña de suavizado hasta una cantidad muy grande; estimaciones robustas de la tendencia y los componentes estacionales que no están distorsionados por un comportamiento aberrante en los datos; especificación del período de componente estacional a cualquier múltiplo entero del intervalo de muestreo de tiempo mayor que uno; y la capacidad de descomponer series de tiempo con valores perdidos.
+\subsection*{Definiciones}
+
+\subsection{Loess-Regresión Local}
+\label{sec:loess}
+Sean $x_i$ y $y_i$ (para $i = 1,2,...,n$) son observaciones de una variable independiente y dependiente respectivamente. La curva de regresión "Loess", $\hat{g}(x)$, es un suavizado de $y$ dado $x$ que puede calcularse para cualquier valor de dominio de la variable independiente. Así "Loess" está definida sobre cualquier valor no solamente sobre $x_i$.Como veremos más adelante, esta es una importante característica que en STL nos permitirá lidiar con los valores perdidos y eliminar el componente estacional de manera sencilla.
+En realidad Loess puede ser usada para suavizar $y$ en función de cualquier número de variables independientes, pero para STL, solo es necesario considerar una variable independiente.
+
+Primero se calcula $\hat{g}(x)$ de la siguiente manera. Se escoge un entero positivo $q$. Supongamos $q\leq n$. Los $q$ valores de $x_i$ que son más cercanos a $x$ se seleccionan, cada uno esta dado por el \textit{Peso del Vecindario} basado en su  distancia desde $x$. Sea $\lambda_q(x)$ la distancia de el \textit{q-ésimo} $x_i$ más lejano de $x$. Sea $W$ la función de peso tricúbica definida por:
+\[
+W(u)=
+\left\{\begin{matrix}
+(1-u^3)^3 & \text{para } 0\leq u < 1  \\ 
+0 & \text{para } u\geq 1
+\end{matrix}\right.
+\] 
+
+El peso del vecindario para cualquier $x_i$ es 
+
+$$ v_i(x)=W \left( \frac{|x_i-x|}{\lambda_q(x)} \right) $$
+
+Así un $x_i$ cercano a $x$ tiene el peso más grande; los pesos decrecen a medida que $x_i$ se aleja de $x$, mientras que se aproxima a cero en el \textit{q-ésimo} punto más lejano. El próximo paso es ajustar un polinomio de grado $d$ a los datos con peso $v_i(x)$ en $(x_i,y_i)$. El valor del polinomio ajustado localmente evaluado en $x$ es $\hat{g}(x)$. En este caso solo analizaremos el caso en que $d=1$ y $2$, es decir, ajustando localmente un polinomio lineal o cuadrático.
+
+Ahora supongamos que $q>n$. $\lambda_n(x)$ es la distancia de $x$ al $x_i$ más lejano. Para $q>n$ definimos $\lambda_q(x)$ por
+$$\lambda_q(x)=\lambda_n(x)\frac{q}{n}$$
+
+Luego de manera análoga a lo anterior, definimos los pesos de los vecindarios usando este valor de $\lambda_q(x)$.
+
+Para usar Loess, $d$ y $q$ deben ser previamente elegidos. Las elecciones en el contexto de STL se discutirán a detalle más adelante. A medida que $q$ crece, $\hat{g}(x)$ se hace más suave. Cuando $q$ tiende a infinito, $v_i(x)$ tiende a 1 y $\hat{g}(x)$ tiende al polinomio de mínimos cuadrados ordinarios de grado $d$.
+
+Supongamos que cada observación $(x_i,y_i)$ tiene un peso $\rho_i$ que expresa la confianza de la observación relativa a las otras. Por ejemplo, si $y_i$ tiene varianza $\sigmañ^2k_i$ donde $k_i$ es conocido, luego $\rho_i$ puede ser $1/k$. Así, podemos incorporar estos pesos en el suvizamiento Loess en forma sencilla usando $\rho_i v_i(x)$ como los pesos en el ajuste de mínimos cuadrados. Esto provee un mecanismo mediante el cual podemos construir robustez en STL.
+
+\subsubsection{El diseño general.}
+
+STL consiste de dos procedimientos recursivos: un bucle interno anidado dentro de un bucle externo. En cada uno de los pasos del bucle interno, las componentes de tendencia y estacionalidad son actualizadas una vez; cada recorrido completo del bucle interno consiste de $n_{(i)}$ tales pasos. Cada paso del bucle externo consiste del bucle interno seguido por el calculo de pesos de robustez; estos pesos son usados en la siguiente corrida del bucle interno para reducir la influencia del comportamiento transitorio y aberrante en las componentes de tendencia y  estacionalidad. Un paso inicial del bucle externo se realiza con todos los pesos de robustez iguales a 1, y luego $n_{(0)}$ pasos del bucle externo se llevan acabo. Las elecciones de $n_{(i)}$ y $n_{(0)}$ se discutirán más adelante. 
+
+Supongamos que el número de observaciones en cada periodo, o ciclo, de la componente estacional es $n_{(p)}$. Por ejemplo, si la serie es mensual con un año de periodicidad, entonces $n_{(p)}=12$. Necesitamos poder referirnos a la subserie de valores en cada posición del ciclo estacional. Por ejemplo, para una serie mensual con $n_{(p)}=12$, la primera subserie contiene los valores de Enero, la segunda tiene los valores de Febrero, y así sucesivamente. Nos referiremos a cada una de estas $n_{(p)}$ subseries como \textit{subserie-ciclo}.
+
+\subsubsection{Bucle Interno}
+
+Cada paso de el bucle interno consiste de un suavizado estacional que actualiza la componente estacional, seguida por suavizado de tendencia que actualiza la componente de tendencia. Supongamos $S_v^{(k)}$ y $T_v^{(k)}$ para $v=1,2,...,N$ son las componentes estacional y de tendencia al final del \textit{k-ésimo} paso; estas dos componentes se definen para todos los tiempos $v=1,2,...,N$, inclusive donde $Y_v$ es un valor perdido. Las actualizaciones de el $(k+1)$ paso, $S_v^{(k+1)}$ y $T_v^{(k+1)}$, son calculadas de la siguiente manera.
+
+\subsubsection{Paso 1.} \textit{Quitar Tendencia.-}
+\label{sbsec:paso1}
+Una serie sin tendencia $Y_v-T_v^{(k)}$ es calculada . Si $Y_v$ es un valor perdido en un punto particular del tiempo, entonces la serie sin tendencia es también tiene un valor perdido en esa posición.
+
+\subsubsection{Paso 2.} \textit{Suavizado de Subseries-Ciclo.-}
+\label{sbsec:paso2}
+Cada subserie-ciclo de la serie sin tendencia es suavizado mediante Loess considerando $q=n_{(s)}$ y $d=1$. Los valores suavizados se calculan en todas las posiciones de tiempo de las subseries-ciclo, incluyendo aquellos con valores perdidos, y en las posiciones justo antes de la primera posición de la subserie y justo después del último. Por ejemplo, suponga que la serie es mensual, $n_{(p)}=12$. La colección de los valores suavizados para todas las subseries-ciclo son series estacionales provisionales, $C_v^{(k+1)}$, consiste de $N+2n_{(p)}$ valores que van desde $v=-n_{(p)}+1$ hasta $N+n_{(p)}$.  
+
+\subsubsection{Paso 3.} \textit{Paso-bajo Filtro de Suavizado de Subseries-ciclo.-}
+\label{sbsec:paso3}
+Un filtro paso-bajo es aplicado a $C_v^{(k+1)}$. El filtro consiste de una media móvil de longitud $n_{(p)}$, seguido por otra media móvil de longitud $n_{(p)}$, seguida de una media móvil de longitud $3$, seguida de un suavizado Loess con $d=1$ y $q=n_{(l)}$. La salida. $L_v^{(k+1)}$, esta definida en las posiciones $v=1$ hasta $N$ porque las tres medias móviles no pueden extenderse hasta el final. El suavizado estacional del \textbf{Paso 2} fue extendido $n_{(p)}$ posiciones en cada final en anticipación de esta pérdida.
+
+\subsubsection{Paso 4.} \textit{Quitar tendencia de las Subseries-Ciclo suavizadas.-}
+\label{sbsec:paso4}
+El componente estacional desde el $(k+1)- ésimo$ bucle es $S_v^{(k+1)}=C_v^{(k+1)}-L_v^{(k+1)}$ para  $v=1,2,...,N$. Se resta $L_v^{(k+1)}$ para evitar que la energía de baja frecuencia entre en el componente estacional.
+
+\subsubsection{Paso 5.} \textit{Desestacionalización.-}
+\label{sbsec:paso5}
+Se calcula la serie desestacionalizada $Y_v-S_v^{(k+1)}$. Si $Y_v$ es un dato perdido en una posición particular de tiempo, entonces también lo será en la serie desestacionalizada.
+
+\subsubsection{Paso 6.} \textit{Suavizado en Tendencia.-}
+\label{sbsec:paso6}
+La serie desestacionalizada es suavizada mediante Loess con los parámetros $q=n_{(t)}$ y $d=1$. Los valores suavizados se calculan para todas las posiciones de tiempo $(v=1,2,...,N)$, inclusive donde existen valores perdidos. La componente de tendencia del $(k+1)-ésimo$ bucle, $R_v^{(k+1)}$ para $v=1,2,...,N$, es el conjunto de valores suavizados. 
+
+
+Así la porción suavizada estacional del bucle interno corresponde a los pasos 2,3,y 4, mientras que la porción de suavizado en tendencia corresponde al\hyperref[sbsec:paso6]{Paso 6}
+
+Para llevar a cabo el Paso 1 en el paso inicial a través del bucle interno necesitamos valores iniciales, $T_v^{(0)}$, para la componente de tendencia. Usando $T_v^{(0)}=0$ funciona bastante bien. La tendencia se vuelve parte de la Subserie-Ciclo suavizada, $C_v^{(1)}$, pero se elimina en gran medida durante el 
+\hyperref[sbsec:paso4]{Paso 4}.
+
+
+\subsection{Bucle externo}
+Supongamos que hemos realizado una ejecución inicial del bucle interno para obtener estimaciones, $T_v$ y $S_v$, de la componentes de tendencia y estacionalidad. Luego el residuo es
+
+$$R_v = Y_v - T_v - S_v$$
+
+(Notemos que el residuo, a diferencia de $T_v$ y $S_v$, no está definido donde $Y_v$ tiene valores perdidos.) 
+Definiremos un peso a cada posición de tiempo en la que $Y_v$ es observado. Estos \textit{pesos de robustez} reflejan lo extremo que es $R_v$. Un valor atípico en los datos que resultan en un $|R_v|$ muy grande tendrá un peso pequeño o próximo a cero. Sea
+$$h=6 \text{ mediana}(|R_v|)$$
+
+Luego los pesos de robustez en el tiempo $v$ es
+$$\rho_v=B \left( \frac{|R_v|}{h}  \right)$$
+
+Donde $B$ es la función bicuadrática de pesos:
+\[
+B(u)=
+\left\{\begin{matrix}
+(1-u^2)^2 & \text{para } 0\leq u < 1  \\ 
+0 & \text{para } u\geq 1
+\end{matrix}\right.
+\] 
+
+Ahora el bucle interno se repite, pero en las series suavizadas de los \hyperref[sbsec:paso2]{Paso 2} y \hyperref[sbsec:paso6]{Paso 6}, el peso del vecindario para el valor en el tiempo $v$ se multiplica por el peso de robustez, $\rho_v$. Esto es solo un uso de los pesos de confiabilidad discutidos en la \hyperref[sec:loess]{Loess}. Estas iteraciones de robustez del bucle externo se llevan a cabo un total de $n_{(0)}$ veces. Cada vez que ingresamos al bucle interno después de la pasada inicial no establecemos $T_v^{(0)}$ como lo hicimos en la pasada inicial, sino que usamos el componente de tendencia del \hyperref[sbsec:paso6]{Paso 6} del bucle interno anterior.
+
+\subsection{Elección de Parámetros}
+
+El STL tiene 6 parámetros:
+\begin{itemize}
+\item $n_{(p)}=$ Número de observaciones en cada ciclo de la componente estacional,
+\item $n_{(i)}=$ Número de pasadas a través el bucle interno,
+\item $n_{(o)}=$ Número de iteraciones robustas del bucle externo,
+\item $n_{(l)}=$ Parámetro de suavizado para el filtro del paso inferior,
+\item $n_{(t)}=$ Parámetro de suavizado para la componente de tendencia,
+\item $n_{(s)}=$ Parámetro de suavizado para la componente estacional.
+\end{itemize}
+
+La elección de los 5 primero parámetros es sencilla. Sin embargo, $n_{(s)}$ debe elegirse cuidadosamente para cada aplicación.
+
+%\subsubsection{$n_{(p)}$, número de observaciones por ciclo de componente estacional}
+
+El parámetro $n_{(p)}$ indica la periodicidad de la serie, por ejemplo para datos con periodicidad anual se toma $n_{(p)}=365$ si los datos son diarios, mientras que para datos mensuales se tomará $n_{(p)}=12$.
+
+%\subsubsection{$n_{(i)}$, número de pasadas a través el bucle interno}
+
+Para la elección de $n_{(i)}$ primero supongamos que no necesitamos las iteraciones robustas ($n_{(p)}=0$), entonces se quiere escoger $n_{(i)}$ suficientemente grande para que las actualizaciones de las componentes estacional y de tendencia converjan, afortunadamente convergen bastante rápido, por lo que en la mayoría de los casos basta tomar $n_{(i)}=1$, aunque se recomienda tomar $n_{(i)}=2$.
+
+En el caso en que necesitemos las iteraciones robustas, se elige $n_{(o)}$ lo suficientemente grande para que las estimaciones de las componentes estacional y de tendencia converjan. En este caso \cite{cleveland1990stl} sugiere fijar $n_{(i)}=1$.
+
+%\subsubsection{$n_{(l)}$, parámetro de suavizado para el filtro del paso inferior}
+
+$n_{(l)}$ siempre se toma como el menor entero impar mayor que $n_{(p)}$.
+
+Para elegir $n_{(s)}$, notamos que cada subserie ciclo se suaviza a medida que $n_{(s)}$ crece, otro criterio a considerar es que $n_{(s)}$ debe ser un impar mayor o igual que 7.
+
+El valor recomendado de $n_{(t)}$ es:
+$$  n_{(t)} = \left[  \frac{1.5n_{(p)}}{(1-1.5n_{(s)})}   \right]_{impar} $$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 % 2.2 Limpieza de Series de Tiempo
 
 \section{Tratamiento de Valores perdidos}
 
-En este capítulo ilustraremos una propuesta para el tratamiento de valores perdidos en series de tiempo estacionales. Para ello consideremos una serie de tiempo $(X_t)_{t\in T}$, de la que conocemos las observaciones 
-$$x_1,x_2,...,x_{j-1}, x_j, x_k, x_{k+1},...,x_n$$
+En este capítulo ilustraremos una propuesta para el tratamiento de valores perdidos en series de tiempo estacionales. Para ello consideremos una serie de tiempo $(Y_t)$, de la que conocemos las observaciones 
+$$y_1,y_2,...,y_{j-1}, y_j, y_k, y_{k+1},...,y_n$$
 
-donde $1 < j < k < n$. Recordemos que la descomposición STL-Loess permité descomponer aditivamente la serie en sus componentes de tendencia y estacionalidad inclusive en aquellos valores de t para los que no conocemos $x_t$ , es decir, para $t=j+1, j+2, ..., k-1$. 
+donde $1 < j < k < n$. Recordemos que la descomposición STL-Loess permité descomponer aditivamente la serie en sus componentes de tendencia y estacionalidad inclusive en aquellos valores de t para los que no conocemos $y_t$ , es decir, para $t=j+1, j+2, ..., k-1$. 
 
-Luego de descomoponer $X_t$ obtenemos su tendencia $D_t$, estacionalidad $S_t$ (para $t=1,2,...,n$), y el residuo $U_t$ (para $t=1,2,...,j,k,...,n$). Además estás series cumplen la relación siguiente.
+Luego de descomoponer $Y_t$ obtenemos su tendencia $T_t$, estacionalidad $S_t$ (para $t=1,2,...,n$), y el residuo $U_t$ (para $t=1,2,...,j,k,...,n$). Además estás series cumplen la relación siguiente.
 
 
 \begin{equation}
 \label{eq:stl_descomp}
-X_t = D_t + S_t + U_t
+Y_t = T_t + S_t + R_t
 \end{equation}
 
-Ilustramos lo antes mencionado en el siguiente gráfico ( \ref{fig:stl_descomp} ) , que corresponde a la descomposición STL-Loess de una serie de datos mensuales de precipitación (lluvias) medidos en cierta zona de Brasil, está serie tiene estacionalidad anual (12 meses); notemos que es necesario fijar los parámetros de la descomposición adecuadamente ya que están asociados al número de retardos considerados al estimar tanto la componente estacional como la tendencia. 
+Ilustramos lo antes mencionado en el siguiente gráfico (Ver  \ref{fig:stl_descomp} ) , que corresponde a la descomposición STL-Loess de una serie de datos mensuales de precipitación (lluvias) medidos en cierta zona de Brasil, está serie tiene estacionalidad anual (12 meses); notemos que es necesario fijar los parámetros de la descomposición adecuadamente ya que están asociados al número de retardos considerados al estimar tanto la componente estacional como la tendencia. 
 
 El gráfico muestra en la primera fila la serie climática, en segundo lugar muestra su componente estacional, en tercera fila encontramos su componente de tendencia, y finalmente el residuo. Como podemos notar las componentes de tendencia y estacionalidad están definidas en todo el dominio de tiempo.
 
 \begin{figure}[h]
-\caption{Descomposición STL-Loess}
-\includegraphics[width=15cm]{Imagenes/Cap2-Stl-Loess.png}
+\caption{Descomposición STL-Loess de Serie}
+\includegraphics[width=15cm]{Cap2-Stl-Loess.png}
 \label{fig:stl_descomp}
 \centering
 \end{figure}
 
-Pues bien, notemos que bastaría conocer los valores de $U_t$ en para todo $t$ e inmediatamente conoceríamos los de $X_t$ por la ecuación \eqref{eq:stl_descomp}. Así, bastaría simular los valores perdidos de $U_t$ que tiende a comportarse como un proceso estacionario, suponiendo que se especificaron bien los parámetros de la descomposición STL. 
-Una forma simple de simular dichos datos, es partiendo de la función de distribución empírica de los Residuos 
-$$\hat{F}_0(u):=\frac{1}{n}\sum_{i=1}^{n} I_{(x_i\leq u)} $$
+Notemos que bastaría conocer los valores de $R_t$ en para todo $t$ e inmediatamente conoceríamos los de $Y_t$ gracias a la ecuación \eqref{eq:stl_descomp}. 
 
-una vez calculada $\hat{F}_0(u)$ usamos el algoritmo siguiente.
+Así, proponemos simular los valores perdidos de $R_t$. Una forma simple de simular dichos valores, es usando el método simulación de la Transformada Inversa (Ver \cite{ross2006simulation} ) partiendo de la función de distribución empírica de los Residuos. Esto debido a que los residuos tienden a comportarse como un proceso estacionario, suponiendo que se especificaron bien los parámetros de la descomposición STL.
+
+
+Pues bien, simulamos los valores perdidos de los residuos usando el siguiente algoritmo.
+
+\begin{enumerate}
+\item Primero calculamos la función de distribución empírica $\hat{F}_0(u)$ de los residuos de la descomposición. 
+
+$$\hat{F}_0(u):=\frac{1}{n}\sum_{i=1}^{n} I_{(y_i\leq u)} $$
+
+
+\item Simular $u\sim U[0,1]$
+\item Calcular $y := \hat{F}_0^{-1}(u) = inf\{ t\in \mathbb{R}: u\leq \hat{F}_0(t) \} $
+
+\end{enumerate}
+
+De esta manera $y$ sigue tiene distribución $\hat F_0$ (la distribución de los Residuos)
+
+Volviendo al ejemplo antes mostrado (Ver \ref{fig:stl_descomp} ), luego de simular los valores perdidos de $R_t$ obtenemos la serie completa $Y_t$ como se puede observar en  (\ref{fig:stl_descomp2})
+
+\begin{figure}[h]
+\caption{Serie Corregida}
+\includegraphics[width=15cm]{Cap2-MarcoTeorico/Cap2-Stl-Loess2.png}
+\label{fig:stl_descomp2}
+\centering
+\end{figure}
+
+
 
 
 
@@ -217,64 +474,7 @@ una vez calculada $\hat{F}_0(u)$ usamos el algoritmo siguiente.
 
 % 2.3 Funciones de Disimilitud entre TS's 
 
-\section{Distancias y Funciones de Disimilitud entre Series de Tiempo}
-
-Desde un punto de vista general el término proximidad indica el concepto de cercanía en espacio, tiempo o cualquier otro contexto. Desde un punto de vista matemático, ese término hace referencia al concepto de disimilaridad o similaridad entre dos elementos. 
-Sea O un conjunto finito o infinito de elementos (individuos, estímulos sujetos u objetos) sobre los que queremos definir una proximidad.
-
-
-\begin{defic}
-Dados dos puntos $o_i, o_j \in O$ y $\delta$ es una función real de $O \times O \rightarrow \mathbb{R}$, con $\delta_{ij}=\delta(o_i,o_j).$ Se diría que $\delta$ es una disimilaridad si verifica
-\begin{itemize}
-\item $\delta_{ij}=\delta_{ji}$, $\forall i,j.$
-\item $\delta_{ii} \leq \delta_{ij}$, $\forall i,j.$
-\item $\delta_{ii}=\delta_{o}$, $\forall i.$
-\end{itemize}
-\end{defic}
-La primera condición podría eliminarse, aunque resulta necesaria si se desea comparar con una distancia. No obstante, esa condición suele violarse cuando las disimilaridades provienen de juicios emitidos por sujetos, ya que éstos no siempre califican igual al par $(i,j)$ que al par $(j,i)$. Las condiciones segunda y tercera suelen establecerse igualmente para $\delta_o=0$, aunque también es conocido que cuando a un individuo le son presentados dos estímulos idénticos, éste tiende a asignarles algún valor de disimilaridad no nulo y generalmente positivo, y además no siempre se define $\delta_o \geq 0$ 0 ya que, si por ejemplo las disimilaridades provienen de una transformación, éstas podrían ser negativas.
-\begin{defic}
-Una función real $s$ de $O \times O \rightarrow \mathbb{R}$, se dirá que es una similaridad si verifica:
-\begin{itemize}
-\item $s_{ij}=s_{ji}$, $\forall i,j.$
-\item $s_{ij} \leq s_{ii}$ $\forall i,j.$
-\item $s_{ii}=s_{o}$, $\forall i.$
-\end{itemize}
-\end{defic}
-Algunos autores consideran $s_o=0$, y además suponen que $0 \leq s_{ij} \leq 1$ ya que una similaridad es un término opuesto al de disimilaridad por lo que deberá existir alguna transformación monótona $t$ tal que $t(s)=\delta$. Una transformación de ese tipo podría ser $\delta=1-s$ si $0 \leq s \leq 1$, aunque otra utilizada en INDSCAL podría ser $\delta=-s$, sin que $s$ deba estar acotada.\\
-Puesto que la idea fundamental sobre la que se basa el MDS es la de asociar disimilaridades a distancias, hemos de verificar, entre otras, que se cumpla la desigualdad triangular. No obstante, si se cumplen los demás axiomas salvo éste, es posible transformar los datos para que ésta también sea verificada, tomando $c=\max_{i,j,h}(\delta_{hj}-\delta_{hi}-\delta_{ij})$ de forma que, $\gamma_{ii}=0$; $\gamma_{ii}=\delta_{ij}+c$, $\forall i \neq j$. \\
-Existen diferentes medidas para el cálculo de disimilaridades o similaridades entre un par de variables o individuos. Si consideramos una matriz de datos $x_{ri}$, obtenida de $n$ objetos sobre $p$ variables, algunos ejemplos de medidas son:
-\begin{itemize}
-\item \textit{Distancia euclídea ponderada}
-$$ \delta_{rs}=\left(\displaystyle \sum_i w_i(x_{ri}-x_{si}) \right)^{1/2} $$
-\item \textit{Métrica de Minkowski}
-$$ \delta_{rs}=\left(\displaystyle \sum_i \abs{x_{ri}-x_{si}}^{\lambda}\right)^{1/\lambda}, \ \ \lambda \geq 1 $$
-\item \textit{Separación angular}
-$$ \delta_{rs}=1-\frac{\sum_i x_{ri}x_{si}}{(\sum_i x_{ri}^2 \sum_i x_{si}^2)^{1/2}} $$
-\item \emphasise{Variograma}
-$$ \delta_{rs}=\frac{\gamma_{rs}}{\sum_{r,s} \gamma_{rs} } $$
-Donde:
-$$\bar{X}_{r.}=\frac{1}{n}\sum_{i}X_{ri}$$
-$$\gamma_{rs}=\frac{1}{(n-1)}\left[\sum_{i} (X_{ri}-X_{si})^2-n(\bar{X}_{r.}-\bar{X}_{s.})^2\rigth]$$
-\end{itemize}
-
-
-% 2.4 Algoritmos de Clusterización
-
-\section{Algoritmos de Clusterización}
-
-% 2.5 ACP Funcional
-
-\section{Análisis de Componentes Principales Funcional}
-
-% 2.6 Modelización SARIMAX
-
-\section{Modelo SARIMAX}
-
-% ---------------------------------------------------------
-
-%Capitulo3: Metodologia
-
-\chapter{Metodología}
+\section{Análisis de Conglomerados (Clúster)}
 
 
 El Análisis Clúster es un técnica de aprendizaje no supervisada que tiene como objetivo dividir un conjunto de objetos en grupos homogéneos (clústers). La partición se realiza de tal manera que los objetos en el mismo clúster son más similares entre sí que los objetos en diferentes grupos según un criterio definido. En muchas aplicaciones reales, el análisis de clúster debe realizarse con datos asociados a  series de tiempo. De hecho, los problemas de agrupamiento de series de tiempo surgen de manera natural en una amplia variedad de campos, incluyendo economía, finanzas, medicina, ecología, estudios ambientales, ingeniería y muchos otros. 
@@ -284,24 +484,1264 @@ Una pregunta crucial en el Análisis Clúster es establecer lo que queremos decir 
 
 De esta manera, diferentes enfoques para definir una función de disimilitud entre series de tiempo han sido propuestos en la literatura pero nos centraremos en aquellas medidas asociadas a la autocorrelación (simple, e inversa), correlación cruzada y periodograma de las series (Ver: \cite{struzik1999haar};  \cite{galeano2000multivariate}; \cite{caiado2006periodogram}; \cite{chouakria2007adaptive}). Estos enfoques basados en características tienen como objetivo representar la estructura dinámica de cada serie mediante un vector de características de menor dimensión, lo que permite una reducción de dimensionalidad (las series temporales son esencialmente datos de alta dimensionalidad) y un ahorro significativo en el tiempo de cálculo, además de que nos ayudan a alcanzar el objetivo central por el que usaremos el Análisis Clúster que es el de la modelización de series de tiempo.
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%El análisis de Conglomerados o Clúster es una rama de métodos que tienen el objetivo de agrupar un conjunto de objetos de tal manera que los objetos de cada grupo sean los más "similares" posible, mientras que objetos de distintos grupos sean "distintos". Una etapa fundamental de este análisis corresponde a la especificación de una medida de similitud (o disimilitud) que permita cuantificar que tan "similares" o "distintos" son los objetos analizados.
+
+\subsection{Métricas y Funciones de Disimilitud}
+
+Desde un punto de vista general el término proximidad indica el concepto de cercanía en espacio, tiempo o cualquier otro contexto. Desde un punto de vista matemático, ese término hace referencia al concepto de disimilitud o similaridad entre dos elementos. 
+Sea O un conjunto finito o infinito de elementos (individuos, estímulos sujetos u objetos) sobre los que queremos definir una proximidad.
+
+
+\begin{defin}
+Dados dos puntos $o_i, o_j \in O$ y $\delta$ es una función real de $O \times O \rightarrow \mathbb{R}$, con $\delta_{ij}=\delta(o_i,o_j).$ Se diría que $\delta$ es una disimilitud si verifica
+\begin{itemize}
+\item $\delta_{ij}=\delta_{ji}$, $\forall i,j.$
+\item $\delta_{ii} \leq \delta_{ij}$, $\forall i,j.$
+\item $\delta_{ii}=\delta_{o}$, $\forall i.$
+\end{itemize}
+\end{defin}
+
+La primera condición podría eliminarse, aunque resulta necesaria si se desea comparar con una distancia. No obstante, esa condición suele violarse cuando las disimilitud provienen de juicios emitidos por sujetos, ya que éstos no siempre califican igual al par $(i,j)$ que al par $(j,i)$. Las condiciones segunda y tercera suelen establecerse igualmente para $\delta_o=0$, aunque también es conocido que cuando a un individuo le son presentados dos estímulos idénticos, éste tiende a asignarles algún valor de disimilitud no nulo y generalmente positivo, y además no siempre se define $\delta_o \geq 0$ ya que, si por ejemplo las disimilitud provienen de una transformación, éstas podrían ser negativas.
+
+Existen diferentes medidas para el cálculo de disimilitud entre un par de variables o individuos. Si consideramos una matriz de datos $x_{ri}$, obtenida de $n$ objetos sobre $p$ variables, algunos ejemplos de medidas son:
+
+\begin{itemize}
+\item \textit{Distancia euclídea ponderada}
+$$ \delta_{rs}=\left(\displaystyle \sum_i w_i(x_{ri}-x_{si}) \right)^{1/2} $$
+\item \textit{Métrica de Minkowski}
+$$ \delta_{rs}=\left(\displaystyle \sum_i \abs{x_{ri}-x_{si}}^{\lambda}\right)^{1/\lambda}, \ \ \lambda \geq 1 $$
+\item \textit{Separación angular}
+$$ \delta_{rs}=1-\frac{\sum_i x_{ri}x_{si}}{(\sum_i x_{ri}^2 \sum_i x_{si}^2)^{1/2}} $$
+
+\end{itemize}
+
+
+\subsection{Métricas para Series de Tiempo}
+
+El problema de medir similitudes o diferencias entre datos asociados a series de tiempo ha sido estudiado ampliamente por autores como \cite{johnson2004multivariate}, además de \cite{galeano2000multivariate} propusieron compara las funciones de autocorrelación de las series, \cite{diggle1991nonparametric}con enfoques no paramétricos comparando el espectro de las series,  \cite{piccolo1990distance} que dió una métrica basada en modelos ARIMA, \cite{diggle1997spectral} quien desarrollo métodos basados en análisis espectral, y \cite{maharaj2000cluster} quien comparó dos series estacionarias basándose en sus parámetros autoregresivos .
+A continuación se muestran un par de ejemplos de estas métricas 
+
+\begin{itemize}
+\item  \cite{galeano2000multivariate} propone una métrica que se basa en la estimación de la función de autocorrelación de las series. Sean $(x_t)$, $(y_t)$ dos series de tiempo, y $\hat\rho =(\hat\rho_1,\hat\rho_2,...,\hat\rho_k)$ el vector de coeficientes de autocorrelación estimados hasta el retardo $k$ (que supondremos es el mayor retardo significativo). Así, se define la distancia entre las series de tiempo $x$ e $y$ como sigue.
+
+$$d_{ACF}(x,y) = \sqrt{(\hat\rho_x - \hat\rho_y)'\Omega (\hat\rho_x - \hat\rho_y)}$$
+Donde $\Omega$ es una matriz de pesos (simétrica y semidefinida positiva) usualmente se considera $\Omega=I_k$
+
+\item \cite{piccolo1990distance} define una métrica para series de tiempo que pueden representarse como un ARIMA(p,0,q) es decir, series que puedan escribirse en su forma Autoregresiva AR($\infty$) mediante el operador $\pi(L) = 1-\pi_1 L -\pi_2 L^2 - ...$. Bajo esas condiciones, se define la métrica siguiente.
+
+$$d_{PIC}(x,y)= \sqrt{\sum_{j=1}^{\infty}(\pi_{(x,j)}-\pi_{(y,j)})^2$$
+
+
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% 2.4 Algoritmos de Clusterización
+
+\subsection{Algoritmos de Agrupamiento}
+
 Una vez que se determina la medida de disimilitud, se obtiene una matriz de disimilitud inicial (que contiene la disimilitud entre parejas de series), y luego se usa un algoritmo de agrupamiento convencional para formar los clústers (grupos) con las series. De hecho, la mayoría de los enfoques de agrupamiento de series de tiempo revisados por \cite{liao2005clustering} son variaciones de procedimientos generales como por ejemplo: K-Means, K-Medoids, PAM, CLARA \cite{kaufman1986clustering} o de Clúster jerárquico que utilizan una gama de disimilitudes específicamente diseñadas para tratar con series de tiempo y algunas de sus características. 
+
+\subsubsection{Particionamiento alrededor de Medoides (PAM)}
+
+El algoritmo PAM fue propuesto en \cite{rousseeuw1990finding}, tiene por objetivo hallar $k$ grupos (clústers), esto mediante la identificación de objetos representativos que están lo más centralmente localizados dentro de cada grupo, estos objetos se conocen como "medoides". Una vez identificados los medoides, los objetos se agrupan al medoide más similar.
+
+%Por ejemplo si un objeto $O_i$ es el medoide de un grupo, entonces diremos que el objeto $O_j$ pertenece a dicho grupo si $d(O_j , O_i) = \underset{O_m}{\min} \{ d(O_j,O_m) \}$
+
+\textbf{Observación. } La "calidad de agrupamiento" del método se mide como la distancia promedio entre los objetos y sus respectivos medoides.
+
+La manera en la que PAM halla los $k$ medoides es partir de un conjunto arbitrario de objetos para luego intercambiarlos sucesivamente de tal manera de que en cada paso se mejore la calidad de agrupamiento.
+
+Por ejemplo, para medir el efecto de intercambiar un objeto $O_i_1$ por $O_i_2$ el algoritmo PAM calcula el costo $C_j (i_1,i_2)$ (para todo objeto $O_j$ no selecionado. $C_j (i_1,i_2)$  se calcula según cada uno de los siguientes casos:
+
+
+\begin{enumerate}
+
+\item  Supongamos que $O_j$ pertenece al grupo representado por el medoide $O_i$. Luego supongamos que $O_j$ es más parecido a $O_{k}$ que $O_h$. Así, si reemplazamos $O_i$ por $O_h$ como medoide del grupo, entonces $O_j$ pertenecería al grupo representado por $O_{k}$. Por lo tanto el costo de intercambio de medoides respecto de $O_j$ es :
+
+$$C_{j}(i,h)= d(O_j,O_{k})-d(O_j,O_i)$$
+
+Notemos que $C_{j}(i,h)\geq 0$ 
+
+\item Supongamos que $O_j$ pertenece al grupo representado por el medoide $O_i$. Pero esta vez $O_j$ es menos parecido a $O_{k}$ que $O_h$. Así, el costo de  reemplazar $O_i$ por $O_h$ viene dado por:
+
+$$C_{j}(i,h)= d(O_j,O_{h})-d(O_j,O_i)$$
+
+En este caso $C_{j}(i,h)$ puede ser positivo o negativo.
+
+\item Supongamos que $O_j$ pertenece a un grupo distinto al representado por el medoide $O_i$ . Sea $O_{k}$ el medoide de ese grupo. Luego supongamos que $O_j$ es más similar a $O_{k}$ que a $O_h$, entonces:
+
+$$C_{j}(i,h)= 0$
+
+\item Supongamos que $O_j$ pertenece al grupo representado por el medoide $O_i$. Entonces reeplazar $O_i$ con $O_h$ provocaría que $O_j$ pase del grupo representado por $O_h$ al grupo representado por $O_k$. Así, el costo viene dado por:
+
+$$C_{j}(i,h) = d(O_j,O_{h})-d(O_j,O_k)$$
+
+Notemos que $C_{j}(i,h)<0$
+
+\item Finalmente el costo total de reemplazar $O_i$ por $O_h$ está dado por:
+
+$$T(i,h)= \sum_{i} C_{j}(i,h)$$
+
+\end{enumerate} 
+
+
+\textbf{Algoritmo}
+
+\begin{enumerate}
+\item Seleccionar $k$ objetos arbitrariamente
+\item Calcular $T(i,h)$ para todos los pares de objetos, tales que $O_i$ está seleccionado y $O_h$ no.
+\item Seleccionar el par $O_i, O_h$ que minimice $T(i,h)$. Si el mínimo $T(i,h)$ es negativo, reemplazar $O_i$ con $O_h$ y vuelva al paso 2. 
+\item Caso contrario, para cada objeto no seleccionado, hallar el medoide más parecido.  
+\end{enumerate}
+
+\textbf{Nota.} Resultados experimentales muestran que PAM funciona adecuadamente con conjuntos de datos pequeños (100 objetos), pero no es eficiente para grandes conjuntos de datos, lo que es evidente al analizar la complejidad del algoritmo PAM donde vemos que cada iteración del algoritmo tiene un orden de complejidad de $O(k(n-k)^2)$.
+
+\subsubsection{CLARA}
+CLARA (Clustering Large Aplications) es un método desarrollado por Kaufman y Rousseuw con la finalidad de lidiar con un gran número de datos. El algoritmo CLARA consiste básicamente  en aplicar PAM sobre una muestra aleatoria de objetos, en lugar de aplicarlo a todos los objetos. Esto debido a que los medoides de una muestra aproximaría a los medoides de todos los objetos. Para mejorar esta aproximación CLARA toma varias muestras y devuelve la mejor agrupación. En este caso, la calidad de agrupamiento se mide como la distancia promedio entre todos los objetos y sus medoides (no solo los de la muestra).
+
+\textbf{Algoritmo}
+
+\begin{enumerate}
+\item Para $i$ de $1$ a $L$ realizar:
+\item Tomar una muestra de $m$ objetos aleatoriamente, y ejecutar el algoritmo PAM para hallar los $k$ medoides de la muestra.
+\item Para cada objeto $O_j$ en la data entera, determinar cual de los $k$ medoides es el más similar.
+\item Calcular la distancia (o disimilitud) promedio del agrupamiento obtenido en el paso anterior. Si este valor es menor al mínimo anterior, actualizamos el valor mínimo y guardar los $k$ medoides del paso 2 como los mejores medoides obtenidos hasta el momento.
+
+\end{enumerate}
+
+Corridas experimentales realizadas en \cite{rousseeuw1990finding} muestran que tomar $L=5$ muestras de tamaño $m=40 + 2k$ da buenos resultados. 
+
+\textbf{Observación. } Se puede corroborar que el orden de complejidad del algoritmo CLARA es $O(k(40+k)^2+k(n-k))$, esto explica porque CLARA es más eficiente que PAM para valores grandes de $n$.
+
+
+%\subsection{CLARANS}
+
+\subsection{Validación}
 
 Una etapa adicional dentro del análisis clúster consiste en determinar la cantidad de clústers que es más apropiada para los datos. Idealmente, los clústers resultantes no solo deberían tener buenas propiedades estadísticas (compactas, bien separadas, conectadas y estables), sino también resultados relevantes. Se han propuesto una variedad de medidas y métodos para validar los resultados de un análisis clúster y determinar tanto el número de clústers, así como identificar qué algoritmo de agrupamiento ofrece el mejor rendimiento, algunas de estas ellas pueden encontrarse en \cite{fraley1998many}; \cite{duda2001pattern} ; \cite{salvador2004determining} ; \cite{kerr2001bootstrapping}. Esta validación puede basarse únicamente en las propiedades internas de los datos o en alguna referencia externa.
 
-Posteriormente se procede al modelamiento SARIMAX de los caudales usando además variables micro y macro climáticas que podrían explicar de mejor manera el comportamiento de estos caudales, cabe mencionar que se modelara únicamente un caudal por cada clúster (grupo).
-El modelo SARIMAX propuesto en \cite{box2015time} es un modelo SARIMA (Seasonal Autoregressive Integrated Moving Average) que incluye variables exógenas. Es decir, compone un modelo de regresión ordinario que usa variables exógenas en el modelo SARIMA que se usa para estudiar series de tiempo estacionales.
+
+
+
+
+
+% 2.5 ACP Funcional
+
+\section{Análisis de Componentes Principales Funcional}
+
+
+\subsection{Estadísticos para Datos Funcionales}
+
+A continuación se muestra un resumen de los estadísticos clásicos aplicados a datos funcionales. El primero de ellos corresponde a la función Media que toma los valores:
+
+\[
+\bar x(t) = \frac{1}{n} \sum_{i=1}^{n} x_i(t)
+\]
+
+De igual manera la función Varianza toma los valores
+
+\[
+var_x(t) = \frac{1}{n-1} \sum_{i=1}^{n} \left[  x(t) - \bar{x}(t) \right]^2
+\]
+
+Y la función Desviación Estándar es la raíz cuadrada de la función Varianza.
+
+Un estadístico también importante es la covarianza y la correlación. En este caso la función de covarianza nos muestra entre las observaciones de $x(t)$ en distintos valores de $t$, se define como sigue:
+
+\[
+cov_x(t_1,t_2) = \frac{1}{n-1}\sum_{i=1}^n [x_i (t_1) - \bar x(t_1)][x_i (t_2) - \bar x(t_2)]
+\]
+
+Luego, la función de correlación viene dada por:
+
+\[
+corr_x(t_1,t_2) = \frac{cov_x(t_1,t_2)}{\sqrt{ var_x(t_1) var_x(t_2) }}
+\]
+
+Como vemos las versiones funcionales de los estadísticos clásicos son análogas a sus definiciones tradicionales.
+
+
+\subsection{ACP clásico}
+El concepto central explotado una y otra vez en estadística multivariante es el de tomar una combinación lineal de variables por ejemplo:
+
+\[
+f_i = \sum_{j=1}^k \beta_j x_{ij} , \phantom{aa} i = 1,2,...,N
+\]
+
+donde $\beta_j$ es un coeficiente de ponderación (pesos) aplicado a los valores observados $x_{ij}$ de la variable $j-ésima$. Podemos escribir la ecuación anterior en su forma vectorial como:
+\[
+f_i = \left \langle  \beta , x_i   \right \rangle  \phantom{aa} i =1,2,...,N
+\]
+
+Donde $\beta = (\beta_1,\beta_2,...,\beta_k)$ y $x_i=(x_{i1},x_{i2},...,x_{ik})$
+
+En el caso multivariante elegimos los pesos para mostrar los tipos de variación que están fuertemente representados en los datos. El análisis de componentes principales se puede definir en términos del siguiente procedimiento paso a paso, que define conjuntos de ponderaciones normalizadas que maximizan la variación de $f_i$.
+
+\begin{enumerate}
+
+\item Primero se halla el vector de pesos $\phi_1 = (\phi_{11}, \phi_{21},...,\phi_{k1})'$ para el cual la combinación:
+
+\[
+f_{i1} := \sum_{j=1}^k \phi_{j1}x_{ij} = \left \langle \phi_1,x_i  \right \rangle
+\]
+
+se maximice $\frac{1}{N}\sum_{i}f_{i1}^2$ (media cuadrática) , sujeto a la condición de que
+\[
+\sum_{j=1}^{k} \phi_{j1}^2 = || \phi_1 ||^2  = 1
+\]
+
+\item En las siguientes iteraciones (de la 2 hasta $k$ como máximo) hacemos seguimos un procedimiento parecido. Por ejemplo para $m-ésimo$ iteración calculamos el vector de pesos $\phi_m$ y los nuevos valores $f_im =  \left \langle \phi_m,x_i  \right \rangle$ que maximicen su media cuadrática $\frac{1}{N}\sum_{i}f_{im}^2$, sujetos a la condición de que $||\phi_m||^2 = 1$ y las $m-1$ condiciones siguientes:
+
+\[
+\sum_{j=1}^{k} \phi_{jr} \phi_{jm} = \left \langle \phi_r,\phi_m  \right \rangle = 0 ,\phantom{aa} r<m
+\]
+
+\end{enumerate}
+
+La motivación para el primer paso es que al maximizar el cuadrado medio, estamos identificando el modo de variación más fuerte y más importante en las variables. La restricción de suma de cuadrados de unidades en los pesos es esencial para que el problema esté bien definido; sin él, los cuadrados medios de los valores de combinación lineal podrían hacerse arbitrariamente grandes. En los pasos segundo y subsiguientes, buscamos nuevamente los modos de variación más importantes, pero requerimos que los pesos que los definen sean ortogonales a los identificados anteriormente, de modo que indiquen algo nuevo. Por supuesto, la cantidad de variación medida en términos de $\frac{1}{N}\sum_{i}f_{im}^2$ decrece en cada iteración.
+
+Los coeficientes de las combinaciones lineales $f_{im}$ se las conoce como \textit{scores de la componente principal} y son útiles en el sentido que indican cuanto de la variabilidad en los datos proviene de la componente principal asociada.
+
+\subsection{ACP Funcional}
+
+Análogamente al ACP clásico, las contrapartes de los valores variables son los valores de función $X_i(s)$, de modo que el índice discreto $j$ en el contexto clásico se reemplaza por el índice continuo $s$. Las sumas sobre $j$ se reemplazan por integrales sobre $s$ para definir la combinación lineal:
+
+\[
+f_i = \int \beta(s) x_i(s) \text{ds} =  \left \langle \beta,x_i  \right \rangle
+\]
+
+Los pesos $\beta_j$ ahora se convierten en funciones de ponderación con valores $\beta(s)$. 
+
+De igual manera el primer paso del ACP funcional consiste en hallar la función de pesos $\phi_1$ que maximice $\frac{1}{N}\sum_{i}f_{i1}^2 = \frac{1}{N}\sum_{i}  \left \langle \phi_1,x_i  \right \rangle  $ sujeto a la condición de que $||\phi_1||^2 \int \phi_1^2(s) \text{ds} = 1$.
+
+Luego en las siguientes iteraciones calculamos la función de ponderación $\phi_m$ elegida de modo que maximice $\frac{1}{N}\sum_{i}  \left \langle \phi_m,x_i  \right \rangle$ sujeto a la condición de que  $||\phi_m||^2 = 1$ y las $m-1$ condiciones de ortogonalidad siguientes:
+
+\[
+\left \langle \phi_r,\phi_m  \right \rangle = 0 ,\phantom{aa} r<m
+\]
+
+Cada función de ponderación tiene la tarea de definir el modo de variación más importante en las curvas sujetas a que cada modo sea ortogonal a todos los modos definidos en los pasos anteriores
+
+\subsection{Bases ortonormales óptimas}
+
+Hay varias otras formas de motivar ACP, y una es definir el siguiente problema: Queremos encontrar un conjunto de $K$ funciones ortonormales $\phi_m$ para que la expansión de cada curva en términos de estas funciones básicas se aproxime lo más posible a la curva . Dado que estas funciones básicas son ortonormales, se deduce que la expansión será de la forma 
+\[
+\hat x_i(t) = \sum_{j=1}^K f_{ij} \phi_j(t)
+\]
+
+donde $$f_{ij}= \left \langle x_i,\phi_j  \right \rangle $. Como criterio de ajuste en cada curva usaremos el error cuadrático definido como:
+\[
+||x_i-\hat x_i||^2 = \int [x_i(s)-\hat x_i(s)]^2 \text{ds}
+\]
+
+Y por lo tanto una media global de ajuste viene dada por 
+
+\[
+SSE = \sum_{i=1}^N ||x_i-\hat x_i||^2
+\]
+
+Así el problema se reduce a hallar la base que minimice SSE, y análogamente al ACP clásico, este problema resulta ser equivalente al de hallar los valores y vectores propios de la matriz de covarianzas, que para el caso funcional resulta en hallar funciones propias a partir de la función de covarianzas, es decir, resolver la ecuación-propia siguiente:
+\begin{equation}\label{ecu:acpf1}
+\int v(s,t)\phi(t) \text{dt} = \left\langle  v(s,.),\phi   \right\rangle = \rho \phi(s)
+\end{equation}
+
+
+donde $v$ es la función de covarianza dada por 
+\[
+v(s,t) = \frac{1}{N} \sum_{i=1}^N  x_i(s)x_i(t)
+\]
+
+Notemos que el lado izquierdo de la ecuación (\ref{ecu:acpf1}) puede expresarse como una transformación integral digamos $V$ definida por:
+\[
+V\phi = \int v(.,t)\phi(t) \text{dt}
+\] 
+
+A esta transformación integral se la conoce como 'Operador de Covarianza". Así, obtenemos de la ecuación (\ref{ecu:acpf1}) la ecuación propia:
+
+\[
+V\phi = \rho \phi
+\]
+
+Donde $\phi$ resulta ser una función propia asociada al operador de covarianza.
+
+
+
+
+
+
+% 2.6 Modelización SARIMAX
+
+\section{Modelos SARIMAX}
+
+
+El modelo SARIMAX es una extensión del modelo SARIMA (Seasonal Autoregressive Integrated Moving Average), mejorado con la capacidad de integrar variables exógenas (explicativas) para aumentar su rendimiento de pronóstico. Esta versión multivariable del modelo SARIMA$(p,d,q)(P,D,Q)_s$, llamada ARIMA estacional con factor exógeno (es decir, SARIMAX), que se expresa formalmente como:
+\[
+\varphi_p (B)= \Phi_P(B^s) \triangledown^d \triangledown _s^Dy_t = \sum_{k=1}^{K}\beta_k x_t^{(k)} + \theta_q (B) \Theta_Q(B^s)\varepsilon_t
+\]
+
+Donde:
+\begin{itemize}
+
+\item $y_t$ es la variable de estudio,
+\item $x_t^{(k)}$ es la k-ésima variable exógena,
+\item $B$ es el operador de retardos ($B^k y_t = y_{t-k}$),
+\item $\varphi_p (B)$ es el polinomio AR de retardos de orden $p$,
+\item $\theta_q (B)$ es el polinomio MA de retardos de orden $p$,
+\item $\Phi_P (B)$ es el polinomio AR de retardos de orden $p$,
+\item $\Theta_Q (B)$ es el polinomio MA de retardos de orden $p$,
+\item $\triangledown^d:=(1-B)^d$ es el operador de diferenciación de orden $d$
+\item $\triangledown _s^D:=(1-B^s)^D$ es el operador de diferenciación estacional de orden $D$ (y estacionalidad $s$) .
+
+
+\end{itemize}
+
+
+% ---------------------------------------------------------
+
+%Capitulo3: Metodologia
+
+\chapter{Metodología} \label{cap2}
+
+\section*{Descripción General}
+
+
+
+\section{Elección de Métrica}
+
+Se selecciona la métrica (en general se usa una función de disimilitud) asociada la ?Autocorrelación? (relación con sus propios retardos), ya que compara el comportamiento Temporal  de una pareja de series por lo que es útil para una posterior modelamiento (SARIMAX por ejemplo, que considera un modelo dependiente del pasado de la serie). A partir de esta pseudo-métrica se genera una matriz de distancias entre todas las estaciones de ?Vazoes?.
+
+\[
+d_{ACF}(x,y) = \sqrt{(\hat \rho_x - \hat\rho_y)'\Omega(\hat{\rho}_x-\hat{\rho}_y)}
+\]
+
+donde $\hat{\rho}$ es el vector de coeficientes de autocorrelación estimados, mientras que $\Omega$ es una matriz de pesos usualmente $\Omega=I$ y así se obtiene la distancia Euclidea entre los coeficientes de autocorrelación, o $\Omega=[cov(\hat\rho)]^{-1}$ y en este caso se obtiene la distancia de Mahalanobis entre los coeficientes de autocorrelación.
+
+\section{Elección del Método de Clústerización}
+
+En esta etapa se elige una técnica de clústerización o agrupamiento que típicamente parte de una matriz de distancias entre objetos (en este caso las series de Vazoes), y considerando estas distancias agrupa estos objetos de tal manera que en cada grupo se encuentren objetos muy cercanos entre si (es decir busca un grupo homogeneo), pero distantes a objetos pertenecientes a otros grupos.
+Entre las técnicas que se consideraron tenemos al Clúster Jerárquico que genera un árbol llamado ?Dendograma? que muestra paso a paso como se forman los grupos.
+Una segunda técnica más eficiente que se considera es el algoritmo CLARA de clusterización, que es usado cuando se necesita agrupar una gran cantidad de objetos.
+
+\textbf{Observación.} La elección del número de grupos en los datos es a veces subjetiva y depende de la experiencia del investigador. Sin embargo, podemos encontrar una partición natural en el conjunto de datos mediante el llamado coeficiente de inconsistencia
+
+\begin{figure}[h]
+\caption{Mapa de Clústers}
+\includegraphics[width=15cm]{Cap3-Metodologia/Capture1.png}
+\label{fig:mapa_clust}
+\centering
+\end{figure}
+
+
+\begin{figure}[h]
+\caption{Series del Clúster 1}
+\includegraphics[width=15cm]{Cap3-Metodologia/Capture2.png}
+\label{fig:clust1}
+\centering
+\end{figure}
+
+\section{Análisis de Componente Principales Funcional}
+
+El ACP típico se encarga de reducir la dimensión de un conjunto de datos mediante el cálculo de un grupo mucho menor de variables ortogonales que mejor representan el conjunto original de datos.
+Análogamente el análisis de componentes principales funcionales (ACPF) es una extensión del ACP clásico en el que las componentes principales están representadas por funciones y no por vectores (Ramsay & Sylverman, 2005). La filosofía principal del análisis de datos funcionales es la creencia de que la mejor fuente de información es la función observada y no un arreglo de números. 
+Así podemos usar todas las series de Vazoes de un clúster para hallar esta función (o funciones) que representan el comportamiento de todo el clúster.
+
+\begin{figure}[h]
+\caption{Análisis de Componentes Principales Funcional}
+\includegraphics[width=15cm]{Cap3-Metodologia/ACPF.png}
+\label{fig:acpf1}
+\centering
+\end{figure}
+
+
+\section{Limpieza de Datos de Clima}
+
+Un punto importante previo al modelamiento, es la limpieza de los datos. En este caso contamos con una alta presencia de valores perdidos especialmente en las series asociadas a variables Climáticas. Por lo que consideramos retirar todas aquellas series que contengan más del 10% de valores perdidos. 
+Mientras que para las restantes, diseñamos un algoritmo de corrección de los valores perdidos de las series. Dicho sea de paso que estas series tienen la peculiaridad de ser Estacionales. 
+
+Pues bien aplicando el algoritmo de de Limpieza de Datos expuesto en el capítulo anterior obtenemos los siguiente
+
+\begin{figure}[h]
+\caption{Serie de Tiempo Climática}
+\includegraphics[width=10cm]{Cap3-Metodologia/limpieza.png}
+\label{fig:acpf1}
+\centering
+\end{figure}
+
+\begin{figure}[h]
+\caption{Serie de Tiempo Climática Corregida}
+\includegraphics[width=10cm]{Cap3-Metodologia/limpieza2.png}
+\label{fig:acpf1}
+\centering
+\end{figure}
+
+\section{Agrupar datos de Vazoes y Clima}
+
+Una vez corregidas las series climáticas, el criterio para agrupar las series climáticas a series de Vazoes de determinado clúster es el siguiente:  Para cada serie de Vazoe del clúster se busca la serie climática de la estación más cercana, al final tenemos un listado de estaciones climáticas por clúster (donde podría esta repetida una o más estaciones pero luego se quitan las estaciones repetidas). 
+
+Finalmete esta lista de estaciones climáticas (y las 6 variables que la conforman) constituyen las variables explicativas del modelo que plantearemos adelante para poder explicar el comportamiento del Flujo (Vazoe) de cada Clúster, es decir de la serie Vazoe que representa el clúster obtenida del ACP-Funcional.
+
+\begin{figure}[h]
+\caption{Serie de Tiempo Climática Corregida}
+\includegraphics[width=16cm]{Cap3-Metodologia/vazclim.png}
+\label{fig:acpf1}
+\centering
+\end{figure}
+
+
+\section{Modelamiento de cada clúster}
+
+Finalmente formulamos un modelo SARIMAX, mismo que considera la parte estacional de los Flujos (Vazoes) representantes de cada Clúster, y además los relaciona con las series climáticas asociadas a dicho clúster.
+El modelo propuesto es SARIMAX$(p,0,q)(P,D,Q)_s$
+\[
+\varphi_p(L)\Psi_P(L^s)\bigtriangledown _s^D V_t = \sum_{k=1}^{w}\beta_k C_{kt} + \phi_q(L) \Phi_Q(L^s)e_t
+\]
+Donde $V_t$ es el caudal estimado del clúster en el tiempo t, $C_{kt}$ son las variables de Clima de la estación $k$ en el tiempo $t$.
+
+
+
+
+%%
+Una modificación del modelo propuesto es usar un SARIMAX$(p,0,q)(P,D,Q)_s$, pero modelando está vez los Logaritmos tanto de Vazoes como de  las Series Climáticas.
+ \[
+\varphi_p(L)\Psi_P(L^s)\bigtriangledown _s^D \log(V_t) = \sum_{k=1}^{w}\beta_k \log(C_{kt}) + \phi_q(L) \Phi_Q(L^s)e_t
+\]
+
+\begin{figure}[h]
+\caption{Ajuste y Predicción del Modelo SARIMAX}
+\includegraphics[width=16cm]{Cap3-Metodologia/sarimax.png}
+\label{fig:sarimax}
+\centering
+\end{figure}
+
+
+\begin{figure}[h]
+\caption{Residuos del Modelo SARIMAX}
+\includegraphics[width=16cm]{Cap3-Metodologia/sarimax_resid.png}
+\label{fig:sarimax_resid}
+\centering
+\end{figure}
+
+
+
+
+
+
+
 
 %Conclusiones y Recomendaciones
 
 \chapter{Conclusiones y Recomendaciones}
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%   APENDICES     %%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
 
-\nocite{*}
+\chapter{Aplicación Web}
 
-\bibliographystyle{siam}
+A continuación, mostramos la implementación en código R de la Aplicación Web desarrollada con el paquete \textit{Shiny}, \cite{shiny}, que contiene el análisis completo de las series de tiempo de flujos de rios de Brasil. Este aplicacion esta compuesta principalmente por tres archivos: \textit{global} , \textit{ui}  y \textit{server} .
+
+\paragraph{Nota. } La aplicación Web con el análisis completo, se encuentra disponible para su uso en la siguiente dirección:
+{\color{blue} https://cristianpachacama.shinyapps.io/Tesis/}. 
+Además puede encontrar el código fuente de la misma en el repositorio de GitHub:
+{\color{blue} https://github.com/CristianPachacama/AppTesis/}
+
+\section{Paquetes (global.R)}
+
+Este archivo contiene la declaración de los paquetes extras, que contienen tods las funciones que se usaran en la aplicación web, y que son necesarios para su correcto funcionamiento.
+
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!}
+\hlcom{#------------------        global.R       ------------------}
+\hlcom{#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!}
+
+\hlstd{pkgTest} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)\{}
+  \hlkwa{if} \hlstd{(}\hlopt{!}\hlkwd{require}\hlstd{(x,}\hlkwc{character.only} \hlstd{=} \hlnum{TRUE}\hlstd{))\{}
+    \hlkwd{install.packages}\hlstd{(x,}\hlkwc{dep}\hlstd{=}\hlnum{TRUE}\hlstd{)}
+    \hlkwa{if}\hlstd{(}\hlopt{!}\hlkwd{require}\hlstd{(x,}\hlkwc{character.only} \hlstd{=} \hlnum{TRUE}\hlstd{))} \hlkwd{stop}\hlstd{(}\hlstr{"Paquete no encontrado"}\hlstd{)}
+  \hlstd{\}}
+\hlstd{\}}
+\hlcom{#Descarga de Paquetes ================================}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"shinydashboard"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"ggplot2"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"dygraphs"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"TSstudio"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"leaflet"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"htmltools"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"rgdal"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"readr"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"DT"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"dplyr"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"reshape2"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"lmtest"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"TSdist"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"xts"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"stlplus"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"TSA"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"forecast"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"smacof"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"cluster"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"ks"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"fpca"}\hlstd{)}
+\hlkwd{pkgTest}\hlstd{(}\hlstr{"fdapace"}\hlstd{)}
+
+\hlcom{# Paquetes Necesarios ===============}
+\hlkwd{library}\hlstd{(shiny)}
+\hlkwd{library}\hlstd{(shinythemes)}
+\hlkwd{library}\hlstd{(shinydashboard)}
+\hlcom{#Graficos}
+\hlkwd{library}\hlstd{(ggplot2)}
+\hlkwd{library}\hlstd{(dygraphs)}
+\hlkwd{library}\hlstd{(TSstudio)}
+\hlcom{#Mapas}
+\hlkwd{library}\hlstd{(leaflet)}
+\hlkwd{library}\hlstd{(htmltools)}
+\hlkwd{library}\hlstd{(rgdal)}
+\hlcom{#Tablas}
+\hlkwd{library}\hlstd{(readr)}
+\hlkwd{library}\hlstd{(DT)}
+\hlkwd{library}\hlstd{(dplyr)}
+\hlkwd{library}\hlstd{(reshape2)}
+\hlcom{#Estadisticos}
+\hlkwd{library}\hlstd{(lmtest)}
+\hlcom{#Series de Tiempo}
+\hlkwd{library}\hlstd{(TSdist)}
+\hlkwd{library}\hlstd{(xts)}
+\hlkwd{library}\hlstd{(TSA)}
+\hlkwd{library}\hlstd{(forecast)}
+\hlcom{# STL - Loess}
+\hlkwd{library}\hlstd{(stlplus)}
+\hlcom{#MDS y Cluster}
+\hlkwd{library}\hlstd{(smacof)}
+\hlkwd{library}\hlstd{(cluster)}
+\hlcom{#ACP Funcional}
+\hlkwd{library}\hlstd{(ks)}
+\hlkwd{library}\hlstd{(fpca)}
+\hlkwd{library}\hlstd{(fdapace)}
+
+\hlcom{#>> Carga de Datos}
+\hlkwd{load}\hlstd{(}\hlstr{'Data/Actual/InterfazMes.RData'}\hlstd{)}
+\hlkwd{load}\hlstd{(}\hlstr{'Data/Actual/DataVazoes.RData'}\hlstd{)}
+\hlkwd{load}\hlstd{(}\hlstr{"Data/Actual/VazoesCode.RData"}\hlstd{)}
+\hlstd{clima_dat}\hlkwb{=}\hlstd{clima_dat2}
+\hlstd{particion} \hlkwb{=} \hlnum{0.20} \hlcom{#Particion Entrenamiento}
+\hlkwd{set.seed}\hlstd{(}\hlnum{2}\hlstd{)}
+\hlcom{# Matiz de Distancias }
+\hlkwd{source}\hlstd{(}\hlkwc{file} \hlstd{=}\hlstr{"Code/SARIMAX/Extras/DistanciasAVazoes.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\section{Interfaz de Usuario (ui.R)}
+
+La interfaz de usuario está compuesta por todos los elementos visuales desde donde el usuario de la aplicación puede interactuar con la misma, en este caso está destinada a que el usuario fije los parámetros que posteriormente son usados como insumos para la ejecución de los análisis (en el "sever"), finalmente muestra a los usuarios los resultados del análisis realizado.
+
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# ================================================================}
+\hlcom{# !!!!!!!!!!!!!!!!!!!!!!    USER INTERFACE   !!!!!!!!!!!!!!!!!!!!!}
+\hlcom{# ================================================================}
+
+\hlkwd{navbarPage}\hlstd{(}
+  \hlkwc{id} \hlstd{=} \hlstr{'tesis'} \hlstd{,}
+  \hlkwc{title} \hlstd{=} \hlstr{"Tesis"}\hlstd{,}
+  \hlkwc{header} \hlstd{= tags}\hlopt{$}\hlkwd{h2}\hlstd{(}\hlstr{" - "}\hlstd{, tags}\hlopt{$}\hlkwd{head}\hlstd{(}
+    \hlstd{tags}\hlopt{$}\hlkwd{link}\hlstd{(}\hlkwc{rel} \hlstd{=} \hlstr{'shortcut icon'}\hlstd{,}
+              \hlkwc{href} \hlstd{=} \hlstr{'epn.ico'}\hlstd{,}
+              \hlkwc{type} \hlstd{=} \hlstr{'image/x-icon'}\hlstd{)}
+  \hlstd{)),}
+  \hlkwc{position} \hlstd{=} \hlstr{"fixed-top"}\hlstd{,}
+  \hlcom{#theme=shinytheme('flatly'),#theme = 'estilo.css',}
+  \hlkwc{footer} \hlstd{=} \hlkwd{fluidRow}\hlstd{(}
+    \hlkwd{column}\hlstd{(}
+      \hlnum{12}\hlstd{,}
+      \hlkwd{img}\hlstd{(}\hlkwc{src} \hlstd{=} \hlstr{'epn_logo.png'}\hlstd{,} \hlkwc{width} \hlstd{=} \hlstr{'30px'}\hlstd{,} \hlkwc{align} \hlstd{=} \hlstr{'center'}\hlstd{),}
+      \hlstd{tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'Proyecto: '}\hlstd{),}
+      \hlstr{' "Extreme low Levels of setreamflow in Hydropower Plants".'} \hlstd{,}
+      \hlstr{'-'}\hlstd{,}
+      \hlstd{tags}\hlopt{$}\hlkwd{a}\hlstd{(}\hlstr{'Departamento de Matemática - EPN (2018)'}\hlstd{,}
+             \hlkwc{href} \hlstd{=} \hlstr{'http://www.epn.edu.ec'}\hlstd{),}
+      \hlstd{tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'  ||  '}\hlstd{),}
+      \hlstd{tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'Desarrollado por: '}\hlstd{),}
+      \hlstd{tags}\hlopt{$}\hlkwd{a}\hlstd{(}\hlstr{'Cristian Pachacama'}\hlstd{,} \hlkwc{href} \hlstd{=}
+               \hlstr{'http://www.linkedin.com/in/cristian-david-pachacama'}\hlstd{)}
+    \hlstd{)}
+  \hlstd{),}
+
+  \hlcom{#INTRODUCCION E INFORMACION DEL PROYECTO ---------------------------}
+  \hlkwd{tabPanel}\hlstd{(}
+    \hlstr{'Introducción'}\hlstd{,}
+    \hlkwc{icon} \hlstd{=} \hlkwd{icon}\hlstd{(}\hlstr{'home'}\hlstd{),}
+
+    \hlkwd{fluidRow}\hlstd{(}
+      \hlkwd{sidebarPanel}\hlstd{(}
+        \hlkwd{img}\hlstd{(}\hlkwc{src} \hlstd{=} \hlstr{'epn_logo2.png'}\hlstd{,} \hlkwc{width} \hlstd{=} \hlstr{'90%'}\hlstd{,} \hlkwc{align} \hlstd{=} \hlstr{'center'}\hlstd{),}
+        \hlkwd{fluidRow}\hlstd{(}\hlstr{' '}\hlstd{),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{fluidRow}\hlstd{(}
+          \hlkwd{column}\hlstd{(}\hlnum{3}\hlstd{, tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'Proyecto Titulación:'}\hlstd{)),}
+          \hlkwd{column}\hlstd{(}\hlnum{1}\hlstd{),}
+          \hlkwd{column}\hlstd{(}
+            \hlnum{8}\hlstd{,}
+            \hlstr{'Análisis Clúster para series de tiempo estacionales
+            y modelización de caudales de ríos del Brasil.'}
+          \hlstd{)}
+          \hlstd{),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{fluidRow}\hlstd{(}\hlkwd{column}\hlstd{(}\hlnum{3}\hlstd{, tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'Proyecto Semilla:'}\hlstd{)),} \hlkwd{column}\hlstd{(}\hlnum{1}\hlstd{),}
+                 \hlkwd{column}\hlstd{(}\hlnum{8}\hlstd{,} \hlstr{'PIS-16-14'}\hlstd{)),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{fluidRow}\hlstd{(}
+          \hlkwd{column}\hlstd{(}\hlnum{3}\hlstd{, tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'Linea de Investigación:'}\hlstd{)),}
+          \hlkwd{column}\hlstd{(}\hlnum{1}\hlstd{),}
+          \hlkwd{column}\hlstd{(}\hlnum{8}\hlstd{,} \hlstr{'Modelos Econométricos'}\hlstd{)}
+        \hlstd{),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{fluidRow}\hlstd{(}\hlkwd{column}\hlstd{(}\hlnum{3}\hlstd{, tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'Departamento:'}\hlstd{)),} \hlkwd{column}\hlstd{(}\hlnum{1}\hlstd{),}
+                 \hlkwd{column}\hlstd{(}\hlnum{8}\hlstd{,} \hlstr{'Matemática'}\hlstd{)),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{fluidRow}\hlstd{(}
+          \hlkwd{column}\hlstd{(}\hlnum{3}\hlstd{, tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'Directora:'}\hlstd{)),}
+          \hlkwd{column}\hlstd{(}\hlnum{1}\hlstd{),}
+          \hlkwd{column}\hlstd{(}\hlnum{8}\hlstd{,} \hlstr{'PhD. Adriana Uquillas'}\hlstd{)}
+        \hlstd{),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{fluidRow}\hlstd{(}\hlkwd{column}\hlstd{(}\hlnum{3}\hlstd{, tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'Autor:'}\hlstd{)),} \hlkwd{column}\hlstd{(}\hlnum{1}\hlstd{),}
+                 \hlkwd{column}\hlstd{(}\hlnum{8}\hlstd{,} \hlstr{'Cristian Pachacama'}\hlstd{))}
+
+
+        \hlstd{),}
+
+      \hlkwd{mainPanel}\hlstd{(}
+        \hlkwd{h3}\hlstd{(}
+          \hlstr{'Análisis Clúster para series de tiempo estacionales
+          y modelización de caudales de ríos del Brasil.'}
+        \hlstd{),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{h4}\hlstd{(}\hlstr{'Resume:'}\hlstd{),}
+        \hlkwd{fluidRow}\hlstd{(}\hlstr{' '}\hlstd{),}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{'This paper deals with the application of the
+          Cluster Analysis for Time Series
+          oriented to the modeling of flows of the main
+          rivers of Brazil, which were measured
+          in 150 stations distributed in them, this from
+          climatic variables and the combination
+          of techniques of modeling as Principal
+          Functional Components Analysis (FPCA),
+          SARIMAX and STL-Loess.'}
+        \hlstd{),}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{'Specifically what is done is to create a
+          small number of clusters (from 2 to 4 clusters)
+          from the 150 stations (where the flows were
+          measured), where each group will
+          contain stations in which their flows have
+          a temporary behavior similar possible,
+          then for each of these clusters, through the
+          use of ACPF, we will find a single time
+          series that summarizes the behavior of the
+          flows of the cluster. Finally, the time series
+          of each cluster is modeled from climatic
+          variables, using them as explanatory
+          variables in the SARIMAX modeling framework.'}
+        \hlstd{),}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{'We will show later the advantages and the
+          efficiency of modeling a huge amount
+          of time series with the use of these techniques,
+          this because the model that explains
+          each cluster can be extended (using the
+          same delays and explanatory variables) to
+          each of the time series that compose it.
+          We perform comparative studies between
+          an individual model (SARIMAX) for a specific
+          flow and the model of the cluster
+          to which it belongs, obtaining similar results
+          in terms of predictability. Where an
+          Average Quadratic Error (RMSE) of 0.3 % and
+          an AIC of 652,21 was obtained for
+          the individual model, while for the cluster
+          model an RMSE of 0.4 % was obtained,
+          and an AIC of 762,32'}
+        \hlstd{),}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{'Thus we show that we managed to move from
+          the problem of modeling 150 time
+          series, to modeling the time series of a few clusters.'}
+        \hlstd{),}
+        \hlkwd{br}\hlstd{(),}
+        \hlkwd{p}\hlstd{(}
+          \hlstd{tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{'Keywords:'}\hlstd{),}
+          \hlstd{tags}\hlopt{$}\hlkwd{i}\hlstd{(}
+            \hlstr{"Time Series Cluster Analysis,
+            STL-Loess decomposition, Functional
+            Principal Component Analysis"}
+          \hlstd{)}
+          \hlstd{)}
+
+          \hlstd{)}
+
+        \hlstd{),}
+    \hlkwd{hr}\hlstd{()}
+
+
+        \hlstd{),}
+
+  \hlcom{# ANALISIS CLUSTER DE SERIES VAZOES ============================}
+  \hlkwd{tabPanel}\hlstd{(}
+    \hlstr{'Clusters'}\hlstd{,}
+
+    \hlkwd{fluidRow}\hlstd{(}
+      \hlcom{# Panel Lateral  -----------}
+      \hlkwd{sidebarPanel}\hlstd{(}
+        \hlkwd{h4}\hlstd{(}\hlstr{'Cluster de Series de Tiempo'}\hlstd{),}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{'Primero selecciona una de las Métricas
+          definidas para series de tiempo.'}
+        \hlstd{),}
+        \hlkwd{selectInput}\hlstd{(}
+          \hlstr{'vaz_clus_metric'}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{'Selecciona Métrica'}\hlstd{,}
+          \hlkwc{selected} \hlstd{=} \hlstr{'D_acf'}\hlstd{,}
+          \hlkwd{list}\hlstd{(}
+            \hlstr{'Correlación Cruzada'} \hlstd{=} \hlstr{'D_ccor'}\hlstd{,}
+            \hlstr{'Autocorrelación'} \hlstd{=} \hlstr{'D_acf'}\hlstd{,}
+            \hlstr{'Correlación de Pearson'} \hlstd{=} \hlstr{'D_cor'}\hlstd{,}
+            \hlstr{'Correlación Temporal'} \hlstd{=} \hlstr{'D_cort'}\hlstd{,}
+            \hlstr{'Métrica Euclidea'} \hlstd{=} \hlstr{'D_euc'}\hlstd{,}
+            \hlstr{'Métrica de Fourier'} \hlstd{=} \hlstr{'D_fourier'}\hlstd{,}
+            \hlstr{'Métrica Infinito'} \hlstd{=} \hlstr{'D_ifnrm'}\hlstd{,}
+            \hlstr{'Métrica Manhatan'} \hlstd{=} \hlstr{'D_manh'}\hlstd{,}
+            \hlstr{'Métrica de Minkwoski'} \hlstd{=} \hlstr{'D_mink'}\hlstd{,}
+            \hlstr{'Autocorrelación Parcial'} \hlstd{=} \hlstr{'D_pacf'}\hlstd{,}
+            \hlstr{'Periodograma'} \hlstd{=} \hlstr{'D_per'}
+          \hlstd{)}
+        \hlstd{),}
+        \hlkwd{p}\hlstd{(}\hlstr{'Luego elige un método de clusterización
+          (agrupamiento).'}\hlstd{),}
+        \hlkwd{selectInput}\hlstd{(}
+          \hlstr{'vaz_clus_metod'}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{'Selecciona Método'}\hlstd{,}
+          \hlkwc{selected} \hlstd{=} \hlstr{'clara'}\hlstd{,}
+          \hlkwd{list}\hlstd{(}
+            \hlstr{'K-Medias'} \hlstd{=} \hlstr{'kmedias'}\hlstd{,}
+            \hlstr{'K-Medoid (CLARA)'} \hlstd{=} \hlstr{'clara'}\hlstd{,}
+            \hlstr{'Cluster Gerárquico'} \hlstd{=} \hlstr{'gerarquico'}
+          \hlstd{)}
+        \hlstd{),}
+        \hlkwd{p}\hlstd{(}\hlstr{'Finalmente elige el número de clusters
+          que quieres que se formen.'}\hlstd{),}
+        \hlkwd{sliderInput}\hlstd{(}
+          \hlstr{'vaz_clus_k'}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{'Número de Clusters'}\hlstd{,}
+          \hlkwc{min} \hlstd{=} \hlnum{2}\hlstd{,}
+          \hlkwc{max} \hlstd{=} \hlnum{8}\hlstd{,}
+          \hlkwc{value} \hlstd{=} \hlnum{4}
+        \hlstd{),}
+        \hlkwd{actionButton}\hlstd{(}
+          \hlstr{'vaz_clus_boton'}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{'Clusterizar'}\hlstd{,}
+          \hlkwc{icon} \hlstd{=} \hlkwd{icon}\hlstd{(}\hlstr{'braille'}\hlstd{)}
+        \hlstd{),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{h4}\hlstd{(}\hlstr{'Gráfico de Series'}\hlstd{),}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{'Para graficar una o varias series,
+          primero clusteriza las estaciones, luego
+          seleccione los nombres de las estaciones
+          correspondientes en la Tabla que
+          se encuentra en la parte inferior derecha'}
+        \hlstd{),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlcom{#Link a pestaña ACP Funcional}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{'Si desea puede seguir con el Análisis
+          de Componentes Principales Funcional
+          de las Series de Flujos en la pestaña'}\hlstd{,}
+          \hlkwd{actionLink}\hlstd{(}\hlkwc{inputId} \hlstd{=} \hlstr{"pestania_acpf"}\hlstd{,} \hlkwc{label} \hlstd{=} \hlstr{"ACP Funcional"}\hlstd{)}
+        \hlstd{)}
+        \hlstd{),}
+      \hlcom{# Panel Principal -----------}
+      \hlkwd{mainPanel}\hlstd{(}
+        \hlkwd{h3}\hlstd{(}\hlstr{'Mapa de Estaciones Clusterizadas: Vazoes '}\hlstd{),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{leafletOutput}\hlstd{(}\hlstr{"mapa_cluster"}\hlstd{,} \hlkwc{width} \hlstd{=} \hlstr{"100%"}\hlstd{,} \hlkwc{height} \hlstd{=} \hlstr{"450px"}\hlstd{),}
+        \hlkwd{hr}\hlstd{(),}
+        \hlkwd{h4}\hlstd{(}\hlstr{'Tabla de Estaciones por Cluster'}\hlstd{),}
+        \hlkwd{fluidRow}\hlstd{(}
+          \hlkwd{dataTableOutput}\hlstd{(}\hlkwc{outputId} \hlstd{=} \hlstr{"tabla_cluster"}\hlstd{),}
+          \hlcom{#, width = "50%")),}
+          \hlkwd{hr}\hlstd{(),}
+          \hlkwd{h4}\hlstd{(}\hlstr{"Grafico de las Series"}\hlstd{),}
+          \hlkwd{dygraphOutput}\hlstd{(}\hlstr{'vaz_clu_grf'}\hlstd{)}
+        \hlstd{)}
+      \hlstd{),}
+      \hlkwd{hr}\hlstd{()}
+        \hlstd{),}
+
+    \hlcom{# Analisis Comp. Princip Funcional  =================}
+    \hlkwd{tabPanel}\hlstd{(}
+      \hlstr{"ACP Funcional"}\hlstd{,}
+
+      \hlkwd{h3}\hlstd{(}\hlkwc{align} \hlstd{=} \hlstr{"center"}\hlstd{,} \hlstr{"Análisis de Componentes Principales Funcional"}\hlstd{),}
+
+      \hlkwd{p}\hlstd{(}
+        \hlstr{'Primero realice el Análisis Clúster en la pestaña anterior ('}\hlstd{,}
+        \hlkwd{actionLink}\hlstd{(}\hlkwc{inputId} \hlstd{=} \hlstr{"pestania_cluster2"}\hlstd{,} \hlkwc{label} \hlstd{=} \hlstr{"Clusters"}\hlstd{),}
+        \hlstr{') fijando adecuadamente los parámetros. Luego, selecciona
+        que Clúster deseas analizar usando ACP Funcional.'}
+      \hlstd{),}
+      \hlcom{# Número de Clúster a Analizar}
+      \hlkwd{selectInput}\hlstd{(}
+        \hlstr{'n_clus_acpf2'}\hlstd{,}
+        \hlkwc{label} \hlstd{=} \hlstr{'Selecciona Clúster'}\hlstd{,}
+        \hlkwc{selected} \hlstd{=} \hlstr{"1"}\hlstd{,}
+        \hlkwc{choices} \hlstd{=} \hlnum{1}\hlopt{:}\hlnum{4}
+      \hlstd{),}
+
+      \hlkwd{p}\hlstd{(}
+        \hlstr{"En el siguiente gráfico se muestran las
+        series de Flujos que componene el clúster,
+        así como una listado de las mismas."}
+      \hlstd{),}
+      \hlcom{#Grafico de Series Vazoes por Cluster}
+      \hlkwd{tabsetPanel}\hlstd{(}
+        \hlcom{#Tabla Vazoes por Cluster}
+        \hlkwd{tabPanel}\hlstd{(}\hlstr{"Listado"}\hlstd{,} \hlkwd{br}\hlstd{(),}
+                 \hlkwd{dataTableOutput}\hlstd{(}\hlkwc{outputId} \hlstd{=} \hlstr{"tab_vaz_clus2"}\hlstd{)),}
+        \hlcom{#Grafico de Vazoes del Cluster}
+        \hlkwd{tabPanel}\hlstd{(}
+          \hlstr{"Gráfico"}\hlstd{,}
+          \hlkwd{br}\hlstd{(),}
+          \hlkwd{br}\hlstd{(),}
+          \hlkwd{dygraphOutput}\hlstd{(}
+            \hlkwc{outputId} \hlstd{=} \hlstr{"graf_vaz_clus2"}\hlstd{,}
+            \hlkwc{width} \hlstd{=} \hlstr{"98%"}\hlstd{,}
+            \hlkwc{height} \hlstd{=} \hlstr{"300px"}
+          \hlstd{)}
+
+        \hlstd{)}
+      \hlstd{),}
+      \hlkwd{br}\hlstd{(),}
+
+      \hlcom{#Resultados ACPF}
+      \hlkwd{h4}\hlstd{(}\hlstr{"Resultados del ACP Funcional"}\hlstd{),}
+      \hlkwd{p}\hlstd{(}
+        \hlstr{"A continuación, se muestra un conjunto
+        de gráficos resultado de haber relizado el
+        ACP Funcional de las series de Flujos del
+        Cluster. Es decir, la función media del
+        proceso, las funciones propias, y el
+        porcentaje que aporta cada componente a la
+        variabilidad del proceso."}
+      \hlstd{),}
+      \hlcom{#Grafico ACOF}
+      \hlkwd{tabsetPanel}\hlstd{(}
+        \hlkwd{tabPanel}\hlstd{(}\hlstr{"Gráfico Resumen"}\hlstd{,}
+
+                 \hlkwd{plotOutput}\hlstd{(}\hlkwc{outputId} \hlstd{=} \hlstr{"graf_acpf1"}\hlstd{)),}
+        \hlkwd{tabPanel}\hlstd{(}\hlstr{"Gráficos de Presición"}\hlstd{,}
+
+                 \hlkwd{plotOutput}\hlstd{(}\hlkwc{outputId} \hlstd{=} \hlstr{"graf_acpf2"}\hlstd{)),}
+        \hlkwd{tabPanel}\hlstd{(}\hlstr{"BoxPlot Funcional"}\hlstd{,}
+
+                 \hlkwd{plotOutput}\hlstd{(}\hlkwc{outputId} \hlstd{=} \hlstr{"graf_acpf3"}\hlstd{))}
+      \hlstd{)}
+
+      \hlstd{),}
+
+    \hlcom{# MODELAMIENTO SARIMAX   ============================}
+    \hlkwd{tabPanel}\hlstd{(}
+      \hlstr{"SARIMAX"}\hlstd{,}
+      \hlkwd{h3}\hlstd{(}\hlkwc{align} \hlstd{=} \hlstr{"center"}\hlstd{,} \hlstr{"Modelamiento SARIMAX"}\hlstd{),}
+      \hlkwd{p}\hlstd{(}
+        \hlstr{"En esta sección modelaremos una serie de
+        tiempo asociada a Flujos, usando como
+        variables regresoras a variables Climáticas y
+        las componentes principales del Clúster obtenidas
+        a partir del ACP Funcional)."}
+    \hlstd{),}
+
+
+    \hlkwd{withMathJax}\hlstd{(),}
+    \hlkwd{p}\hlstd{(}
+      \hlstr{"Se plantea un modelo \textbackslash{}\textbackslash{}(SARIMAX(p,d,q,P,D,Q) \textbackslash{}\textbackslash{}),
+      que tiene la siguiente forma:"}
+    \hlstd{),}
+    \hlkwd{p}\hlstd{(}
+      \hlkwc{align} \hlstd{=} \hlstr{"center"}\hlstd{,}
+      \hlstr{"\textbackslash{}\textbackslash{}( \textbackslash{}\textbackslash{}varphi_p(L)\textbackslash{}\textbackslash{}Psi_P(L^s) \textbackslash{}\textbackslash{}bigtriangledown _s^D V_t =
+      \textbackslash{}\textbackslash{}sum_\{k=1\}^\{w\}\textbackslash{}\textbackslash{}beta_k C_\{kt\} + \textbackslash{}\textbackslash{}phi_q(L) \textbackslash{}\textbackslash{}Phi_Q(L^s)e_t \textbackslash{}\textbackslash{})"}
+    \hlstd{),}
+
+    \hlcom{#Especificaciones}
+    \hlkwd{p}\hlstd{(}
+      \hlstr{"Donde \textbackslash{}\textbackslash{}(V_t\textbackslash{}\textbackslash{}) es el caudal estimado del clúster en el
+      tiempo \textbackslash{}\textbackslash{}(t\textbackslash{}\textbackslash{}), \textbackslash{}\textbackslash{}(C_\{kt\}\textbackslash{}\textbackslash{}) son las variables de Clima
+      de la estación \textbackslash{}\textbackslash{}(k\textbackslash{}\textbackslash{}) en el tiempo \textbackslash{}\textbackslash{}(t\textbackslash{}\textbackslash{})."}
+    \hlstd{),}
+
+
+    \hlkwd{p}\hlstd{(}
+      \hlstr{"Para ello primero seleccione el Clúster
+      que desea analizar. Recuerde haber realizado
+      primero el Análisis respectivo en la primera pestaña ("}\hlstd{,}
+      \hlkwd{actionLink}\hlstd{(}\hlkwc{inputId} \hlstd{=} \hlstr{"pestania_cluster3"}\hlstd{,} \hlkwc{label} \hlstd{=} \hlstr{"Clusters"}\hlstd{),}
+      \hlstr{').'}
+      \hlstd{),}
+    \hlcom{#Seleccionar Numero de Cluster}
+    \hlkwd{selectInput}\hlstd{(}
+      \hlstr{'n_clus_acpf3'}\hlstd{,}
+      \hlkwc{label} \hlstd{=} \hlstr{'Selecciona Clúster'}\hlstd{,}
+      \hlkwc{selected} \hlstd{=} \hlstr{"1"}\hlstd{,}
+      \hlkwc{choices} \hlstd{=} \hlnum{1}\hlopt{:}\hlnum{4}
+    \hlstd{),}
+    \hlkwd{p}\hlstd{(}
+      \hlstr{"A continuación, seleccione la estación
+      correspondiente a la serie de tiempo de
+      Flujos que desea modelar."}
+    \hlstd{),}
+    \hlcom{#Seleccionar Estacion Vazoe}
+    \hlkwd{selectInput}\hlstd{(}
+      \hlstr{'nomb_est_vaz3'}\hlstd{,}
+      \hlkwc{label} \hlstd{=} \hlstr{'Selecciona Estación'}\hlstd{,}
+      \hlkwc{selected} \hlstd{=} \hlstr{"1"}\hlstd{,}
+      \hlkwc{choices} \hlstd{=} \hlnum{1}\hlopt{:}\hlnum{4}
+    \hlstd{),}
+    \hlcom{#Grafico Estacion Seleccionada}
+    \hlkwd{dygraphOutput}\hlstd{(}\hlkwc{outputId} \hlstd{=} \hlstr{"graf_vaz_estacion"}\hlstd{,} \hlkwc{width} \hlstd{=} \hlstr{"98%"}\hlstd{),}
+    \hlkwd{p}\hlstd{(}
+      \hlstr{"Luego, elije las variables regresoras del
+      modelo, en este caso contamos con variables Climáticas."}
+    \hlstd{),}
+    \hlkwd{br}\hlstd{(),}
+    \hlcom{# Variables Climáticas}
+    \hlkwd{h4}\hlstd{(}\hlstr{"Variables Regresoras"}\hlstd{),}
+    \hlkwd{p}\hlstd{(}
+      \hlstr{"En la siguiente tabla se muestran las
+      series climáticas asociadas a las estaciones
+      de medición más cercanas a las estaciones
+      donde se midieron los Flujos que componen
+      el Clúster. Además, podemos encontrar
+      la gráfica de dichas series, así como un mapa
+      donde podemos observar las estaciones de
+      medición de Flujos y sus correspondientes
+      estaciones de medición de Clima."}
+    \hlstd{),}
+    \hlkwd{p}\hlstd{(}
+      \hlstd{tags}\hlopt{$}\hlkwd{b}\hlstd{(}\hlstr{"Nota:"}\hlstd{),}
+      \hlstr{"Es posible que sea necesario
+      desestacionalizar las series de clima,
+      antes de ser usadas en el modelo."}
+    \hlstd{),}
+    \hlkwd{checkboxInput}\hlstd{(}\hlstr{"ruidoClimaBox"}\hlstd{,}
+                  \hlkwc{label} \hlstd{=} \hlstr{"Desestacionalizar Series de Clima."}\hlstd{,}
+                  \hlkwc{value} \hlstd{=} \hlnum{FALSE}\hlstd{),}
+    \hlkwd{p}\hlstd{(}
+      \hlstr{"Puede incluir en el modelo además, variables
+      como la serie de Fujos representante
+      del Clúster, así como las series que
+      representan a las variables Climáticas:
+      Precipitación, Temperatura Máxima,
+      Temperatura Mínima, y Humedad (halladas a partir
+      de ACP Funcional)."}
+    \hlstd{),}
+    \hlcom{# Eleccion Variables Extras}
+    \hlkwd{checkboxInput}\hlstd{(}\hlstr{"flujoBox"}\hlstd{,}
+                  \hlkwc{label} \hlstd{=} \hlstr{"Flujo del Clúster"}\hlstd{,}
+                  \hlkwc{value} \hlstd{=} \hlnum{FALSE}\hlstd{),}
+    \hlkwd{checkboxInput}\hlstd{(}\hlstr{"precipBox"}\hlstd{,}
+                  \hlkwc{label} \hlstd{=} \hlstr{"Precipitación del Clúster"}\hlstd{,}
+                  \hlkwc{value} \hlstd{=} \hlnum{FALSE}\hlstd{),}
+    \hlkwd{checkboxInput}\hlstd{(}\hlstr{"tempMaxBox"}\hlstd{,}
+                  \hlkwc{label} \hlstd{=} \hlstr{"Temperatura Máxima del Clúster"}\hlstd{,}
+                  \hlkwc{value} \hlstd{=} \hlnum{FALSE}\hlstd{),}
+    \hlkwd{checkboxInput}\hlstd{(}\hlstr{"tempMinBox"}\hlstd{,}
+                  \hlkwc{label} \hlstd{=} \hlstr{"Temperatura Mínima del Clúster"}\hlstd{,}
+                  \hlkwc{value} \hlstd{=} \hlnum{FALSE}\hlstd{),}
+    \hlkwd{checkboxInput}\hlstd{(}\hlstr{"humedBox"}\hlstd{,}
+                  \hlkwc{label} \hlstd{=} \hlstr{"Humedad del Clúster"}\hlstd{,}
+                  \hlkwc{value} \hlstd{=} \hlnum{FALSE}\hlstd{),}
+
+    \hlcom{#Pestañas}
+    \hlkwd{tabsetPanel}\hlstd{(}
+      \hlkwd{tabPanel}\hlstd{(}
+        \hlstr{"Variables Regresoras"}\hlstd{,}
+        \hlkwd{br}\hlstd{(),}
+        \hlcom{#Tabla Variables Clima del Clúster}
+        \hlkwd{dataTableOutput}\hlstd{(}\hlkwc{outputId} \hlstd{=} \hlstr{"tab_clim_clus3"}\hlstd{)}
+      \hlstd{),}
+      \hlkwd{tabPanel}\hlstd{(}
+        \hlstr{"Gráfico"}\hlstd{,}
+        \hlkwd{br}\hlstd{(),}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{"Primero selecciona las variables de
+          la tabla anterior para que sean graficadas."}
+        \hlstd{),}
+        \hlcom{#Grafico de las Series Climaticas}
+        \hlkwd{dygraphOutput}\hlstd{(}
+          \hlkwc{outputId} \hlstd{=} \hlstr{"graf_clim_clus3"}\hlstd{,}
+          \hlkwc{width} \hlstd{=} \hlstr{"98%"}\hlstd{,}
+          \hlkwc{height} \hlstd{=} \hlstr{"400px"}
+        \hlstd{)}
+
+        \hlstd{),}
+      \hlkwd{tabPanel}\hlstd{(}\hlstr{"Mapa"}\hlstd{,}
+               \hlcom{#Mapa de estaciones de Clima}
+               \hlkwd{leafletOutput}\hlstd{(}\hlkwc{outputId} \hlstd{=} \hlstr{"map_clim_clus3"}\hlstd{))}
+
+    \hlstd{),}
+    \hlkwd{br}\hlstd{(),}
+    \hlkwd{p}\hlstd{(}
+      \hlstr{"Nota: Si no selecciona ninguna
+      de las variables de la tabla anterior, por
+      defecto se consideran todas las variable climáticas."}
+    \hlstd{),}
+    \hlkwd{br}\hlstd{(),}
+
+    \hlcom{#Parámetros del Modelo}
+    \hlkwd{h4}\hlstd{(}\hlstr{"Selección del Parámetros"}\hlstd{),}
+    \hlkwd{p}\hlstd{(}
+      \hlstr{"A continuación puede elegir los parámetros
+      \textbackslash{}\textbackslash{}( (p,d,q,P,D,Q)\textbackslash{}\textbackslash{}) del modelo (asociados
+      a los retardos y diferencias)."}
+    \hlstd{),}
+
+    \hlkwd{fluidRow}\hlstd{(}
+      \hlkwd{column}\hlstd{(}
+        \hlnum{4}\hlstd{,}
+        \hlkwd{selectInput}\hlstd{(}
+          \hlkwc{inputId} \hlstd{=} \hlstr{"par_p"}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{"p"}\hlstd{,}
+          \hlkwc{choices} \hlstd{=} \hlnum{0}\hlopt{:}\hlnum{12}\hlstd{,}
+          \hlkwc{selected} \hlstd{=} \hlnum{6}
+        \hlstd{),}
+        \hlkwd{selectInput}\hlstd{(}
+          \hlkwc{inputId} \hlstd{=} \hlstr{"par_P"}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{"P"}\hlstd{,}
+          \hlkwc{choices} \hlstd{=} \hlnum{0}\hlopt{:}\hlnum{12}\hlstd{,}
+          \hlkwc{selected} \hlstd{=} \hlnum{1}
+        \hlstd{)}
+      \hlstd{),}
+      \hlkwd{column}\hlstd{(}
+        \hlnum{4}\hlstd{,}
+        \hlkwd{selectInput}\hlstd{(}
+          \hlkwc{inputId} \hlstd{=} \hlstr{"par_d"}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{"d"}\hlstd{,}
+          \hlkwc{choices} \hlstd{=} \hlnum{0}\hlopt{:}\hlnum{3}\hlstd{,}
+          \hlkwc{selected} \hlstd{=} \hlnum{0}
+        \hlstd{),}
+        \hlkwd{selectInput}\hlstd{(}
+          \hlkwc{inputId} \hlstd{=} \hlstr{"par_D"}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{"D"}\hlstd{,}
+          \hlkwc{choices} \hlstd{=} \hlnum{0}\hlopt{:}\hlnum{3}\hlstd{,}
+          \hlkwc{selected} \hlstd{=} \hlnum{1}
+        \hlstd{)}
+      \hlstd{),}
+      \hlkwd{column}\hlstd{(}
+        \hlnum{4}\hlstd{,}
+        \hlkwd{selectInput}\hlstd{(}
+          \hlkwc{inputId} \hlstd{=} \hlstr{"par_q"}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{"q"}\hlstd{,}
+          \hlkwc{choices} \hlstd{=} \hlnum{0}\hlopt{:}\hlnum{8}\hlstd{,}
+          \hlkwc{selected} \hlstd{=} \hlnum{4}
+        \hlstd{),}
+        \hlkwd{selectInput}\hlstd{(}
+          \hlkwc{inputId} \hlstd{=} \hlstr{"par_Q"}\hlstd{,}
+          \hlkwc{label} \hlstd{=} \hlstr{"Q"}\hlstd{,}
+          \hlkwc{choices} \hlstd{=} \hlnum{0}\hlopt{:}\hlnum{8}\hlstd{,}
+          \hlkwc{selected} \hlstd{=} \hlnum{0}
+        \hlstd{)}
+      \hlstd{)}
+
+    \hlstd{),}
+    \hlkwd{br}\hlstd{(),}
+    \hlkwd{p}\hlstd{(}
+      \hlkwc{align} \hlstd{=} \hlstr{"center"}\hlstd{,}
+      \hlkwd{actionButton}\hlstd{(}
+        \hlkwc{inputId} \hlstd{=} \hlstr{"boton_modelo"}\hlstd{,}
+        \hlkwc{label} \hlstd{=} \hlstr{"Ejecutar Análisis"}\hlstd{,}
+        \hlkwc{icon} \hlstd{=} \hlkwd{icon}\hlstd{(}\hlstr{"cog"}\hlstd{,} \hlkwc{lib} \hlstd{=} \hlstr{"glyphicon"}\hlstd{)}
+      \hlstd{)}
+    \hlstd{),}
+
+    \hlkwd{hr}\hlstd{(),}
+    \hlkwd{h3}\hlstd{(}\hlstr{"Resultados"}\hlstd{,} \hlkwc{align} \hlstd{=} \hlstr{"center"}\hlstd{),}
+    \hlkwd{h4}\hlstd{(}\hlkwd{textOutput}\hlstd{(}\hlkwc{outputId} \hlstd{=} \hlstr{"estacion_modelada"}\hlstd{)),}
+
+    \hlkwd{tabsetPanel}\hlstd{(}
+      \hlcom{#Coeficientes Estimados}
+      \hlkwd{tabPanel}\hlstd{(}
+        \hlstr{"Coeficientes"}\hlstd{,}
+        \hlkwd{br}\hlstd{(),}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{"En esta sección presentamos un
+          resumen general del modelo estimado
+          a partir de los parámetros antes fijados."}
+        \hlstd{),}
+        \hlkwd{verbatimTextOutput}\hlstd{(}\hlstr{"coeficientes"}\hlstd{)}
+        \hlstd{),}
+      \hlcom{#Residuos}
+      \hlkwd{tabPanel}\hlstd{(}
+        \hlstr{"Residuos"}\hlstd{,}
+        \hlkwd{br}\hlstd{(),}
+        \hlkwd{p}\hlstd{(}
+          \hlstr{"A continuación podemos ver el gráfico
+          de los residuos, su distribución, así como
+          la función de autocorrelación de los mismos."}
+        \hlstd{),}
+        \hlkwd{plotOutput}\hlstd{(}\hlstr{"resid_graf"}\hlstd{)}
+        \hlstd{),}
+      \hlcom{#Prediccion}
+      \hlkwd{tabPanel}\hlstd{(}\hlstr{"Predicción"}\hlstd{)}
+
+
+
+      \hlstd{),}
+
+    \hlkwd{br}\hlstd{()}
+
+
+      \hlstd{)}
+
+    \hlstd{)}
+    \hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+
+\section{Ejecución de Tareas (server.R)}
+
+En el "server" se ejecutan todas las funciones y calculos que hacen parte del análisis, para posteriormente mostrar los resultados del mismo en la interfáz de usuario.
+
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# =================================================================}
+\hlcom{# !!!!!!!!!!!!!!!!!!!!!!!!     SERVER      !!!!!!!!!!!!!!!!!!!!!!!!}
+\hlcom{# =================================================================}
+\hlkwa{function}\hlstd{(}\hlkwc{input}\hlstd{,} \hlkwc{output}\hlstd{,}\hlkwc{session}\hlstd{) \{}
+
+  \hlcom{#Analisis Cluster  ------------------------------}
+  \hlcom{# source("Code/Clusters/MapaEstaciones.R",local = TRUE)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/Clusters/Analisis.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/Clusters/Mapa.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/Clusters/Tabla.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/Clusters/Grafico.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlcom{#Link a panel Modelamiento}
+  \hlkwd{observeEvent}\hlstd{(input}\hlopt{$}\hlstd{pestania_acpf, \{}
+    \hlkwd{updateNavbarPage}\hlstd{(session,} \hlstr{"tesis"}\hlstd{,} \hlstr{"ACP Funcional"}\hlstd{)}
+  \hlstd{\})}
+
+
+  \hlcom{# Analisis Componentes Principales --------------}
+  \hlkwd{observe}\hlstd{(\{}
+    \hlkwd{updateSelectInput}\hlstd{(session,}\hlkwc{inputId} \hlstd{=} \hlstr{"n_clus_acpf2"}\hlstd{,}
+                      \hlkwc{choices} \hlstd{=} \hlnum{1}\hlopt{:}\hlkwd{as.numeric}\hlstd{(input}\hlopt{$}\hlstd{vaz_clus_k) )}
+  \hlstd{\})}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/ACP Funcional/1_TablaVaz.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/ACP Funcional/1_GraficoVaz.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/ACP Funcional/2_ACP Funcional.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/ACP Funcional/2_ACPF Graficos.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{observeEvent}\hlstd{(input}\hlopt{$}\hlstd{pestania_cluster2, \{}
+    \hlkwd{updateNavbarPage}\hlstd{(session,} \hlstr{"tesis"}\hlstd{,} \hlstr{"Clusters"}\hlstd{)}
+  \hlstd{\})}
+
+
+
+  \hlcom{# Modelamiento SARIMAX  -------------------------}
+  \hlkwd{observe}\hlstd{(\{}
+    \hlkwd{updateSelectInput}\hlstd{(session,}\hlkwc{inputId} \hlstd{=} \hlstr{"n_clus_acpf3"}\hlstd{,}
+                      \hlkwc{choices} \hlstd{=} \hlnum{1}\hlopt{:}\hlkwd{as.numeric}\hlstd{(input}\hlopt{$}\hlstd{vaz_clus_k) )}
+  \hlstd{\})}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/SARIMAX/0_Datos Clima.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/SARIMAX/1_Lista Vazoes.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/SARIMAX/1_Grafico Vazoe.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/ACP Funcional/Clima/ACP Clima.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/SARIMAX/2_Datos Reactivos.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/SARIMAX/2_Tabla Regresoras.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/SARIMAX/2_Grafico Regresoras.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/SARIMAX/Extras/TrainTest.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/SARIMAX/3_Modelo.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{source}\hlstd{(}\hlstr{"Code/SARIMAX/3_Resultados.R"}\hlstd{,}\hlkwc{local} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+  \hlkwd{observeEvent}\hlstd{(input}\hlopt{$}\hlstd{pestania_cluster3, \{}
+    \hlkwd{updateNavbarPage}\hlstd{(session,} \hlstr{"tesis"}\hlstd{,} \hlstr{"Clusters"}\hlstd{)}
+  \hlstd{\})}
+  \hlcom{#Subtitutlo Resultados}
+  \hlstd{output}\hlopt{$}\hlstd{estacion_modelada} \hlkwb{=} \hlkwd{renderText}\hlstd{(\{}
+    \hlkwd{paste}\hlstd{(}\hlstr{"Modelamiento Estación:"}\hlstd{,input}\hlopt{$}\hlstd{nomb_est_vaz3)}
+  \hlstd{\})}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\chapter{Apendice 2}
+
+Now we show all the code chunks:
+
+
+
+
+\chapter{Apendice 3}
+
+Now we show all the code chunks:
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \nocite{*}
+\cleardoublepage
+\bibliographystyle{apalike}
 \bibliography{Bibliografia/bibliografia}
+
 \addcontentsline{toc}{chapter}{Bibliografía}
 
 
@@ -312,124 +1752,3 @@ El modelo SARIMAX propuesto en \cite{box2015time} es un modelo SARIMA (Seasonal 
 
 \end{document}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% \begin{document}
-
-
-% \frontmatter
-% \portadilla
-% \declaracion
-% \certificacion
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%     AGRADECIMIENTOS    %%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \begin{agradecimiento}
-% 
-% A mi familia, ya que su cariÃ±o y apoyo me llevaron a donde ahora estoy.  
-% A mis mejores amigos Miguel, Rubi, Luis y Pablo, por brindarme su amistad y tan gratos momentos.
-% 
-% A mi tutora Adriana por ser una guÃ­a y apoyarme desde el primer momento a alcanzar esta meta, gracias por depositar su confianza en mi.
-% A los profesores Erwin Jimenez, y de manera especial a Juan Carlos Trujillo quienes hicieron nacer en mi la pasiÃ³n por la MatemÃ¡tica, pasiÃ³n que espero inspirar a mÃ¡s generaciones de estudiantes. 
-% 
-% Finalmente, a grandes matemÃ¡ticos de la historia como George Cantor,  SimeÃ³n Poisson , Abraham Wald, y Karl Pearson, cuyo trabajo me inspirÃ³ a profundizar en el conocimiento de esta bella ciencia.
-% 
-% 
-% \end{agradecimiento}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%       DEDICATORIA      %%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \begin{dedicatoria}
-% A mis padres Magdalena y Lucio, por su incondicional amor, sus sabios consejos y su paciencia, siempre lo tendrÃ© presente. A Isabel por su apoyo incondicional, y por aparecer en el momento exacto en mi vida para llenarla de felicidad. A Miguel, Rubi, Pablo y Luis por brindarme su sincera amistad.
-% 
-% \end{dedicatoria}
-
-
-% \tableofcontents
-% \listoffigures
-% \listoftables
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%         ABSTRACT       %%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \include{Capitulos/0Resumen}
-
-
-% \mainmatter
-% \addtolength{\abovedisplayskip}{-1mm}
-% \addtolength{\belowdisplayskip}{-1mm}
-%\include{Capitulos/CapituloUNO}
-
-
-
-\include{Capitulos/1Introduccion}
-
-
-
-\include{Capitulos/2MarcoTeorico}
-
-
-
-\include{Capitulos/3Metodologia}
-
-
-
-\include{Capitulos/conclusiones}
-
-\appendix
-\include{Apendice/1Apend}
-
-
-
-
-
-\nocite{*}
-
-\bibliographystyle{siam}
-\bibliography{bibTesis}
-\addcontentsline{toc}{chapter}{BibliografÃ­a}
-
-
-\end{document} 
