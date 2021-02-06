@@ -1,11 +1,13 @@
 \section{Tratamiento de Valores perdidos}
+\label{sec:limpieza}
+El tratamiento de valores perdidos en una base de datos es un procedimiento fundamental en cualquier estudio estad√≠stico, debido a que puede provocar en cierta medida un impacto sobre los resultados obtenidos del estudio.
 
-En este capÌtulo ilustraremos una propuesta para el tratamiento de valores perdidos en series de tiempo estacionales. Para ello consideremos una serie de tiempo $(Y_t)$, de la que conocemos las observaciones 
+En esta secci√≥n ilustraremos una propuesta para el tratamiento de valores perdidos en series de tiempo estacionales. Para ello consideremos una serie de tiempo $(Y_t,t\in \Z)$, de la que conocemos las observaciones 
 $$y_1,y_2,...,y_{j-1}, y_j, y_k, y_{k+1},...,y_n$$
 
-donde $1 < j < k < n$. Recordemos que la descomposiciÛn STL-Loess permitÈ descomponer aditivamente la serie en sus componentes de tendencia y estacionalidad inclusive en aquellos valores de t para los que no conocemos $y_t$ , es decir, para $t=j+1, j+2, ..., k-1$. 
+donde $1 < j < k < n$, es decir, no conocemos los valores de $y_t$ para $t=j+1, j+2, ..., k-1$. Comenzaremos con este caso en el que existe un periodo, compuesto de instantes consecutivos, en el que no conocemos el valor de $y_t$, pero veremos que a partir de este es posible extender el m√©todo para tratar a series de tiempo con varios periodos o inclusive instantes no consecutivos de tiempo.
 
-Luego de descomoponer $Y_t$ obtenemos su tendencia $T_t$, estacionalidad $S_t$ (para $t=1,2,...,n$), y el residuo $U_t$ (para $t=1,2,...,j,k,...,n$). Adem·s est·s series cumplen la relaciÛn siguiente.
+Como vimos en la secci√≥n anterior, la descomposici√≥n STL-Loess permite descomponer aditivamente una serie de tiempo en sus componentes de tendencia y estacionalidad inclusive en aquellos valores de $t$ para los que no conocemos $y_t$. Entonces aplicamos la descomposici√≥n STL-Loess a $Y_t$, as√≠ obtenemos su tendencia $T_t$ y estacionalidad $S_t$ en todo instante de tiempo $t=1,2,...,n$. Adem√°s, obtenemos un residuo $U_t$ en aquellos instantes de tiempo $t$ en los cuales conocemos $Y_t$, es decir para $t=1,2,...,j,k,...,n$.
 
 
 \begin{equation}
@@ -13,38 +15,51 @@ Luego de descomoponer $Y_t$ obtenemos su tendencia $T_t$, estacionalidad $S_t$ (
 Y_t = T_t + S_t + R_t
 \end{equation}
 
-Ilustramos lo antes mencionado en el siguiente gr·fico (Ver  \ref{fig:stl_descomp} ) , que corresponde a la descomposiciÛn STL-Loess de una serie de datos mensuales de precipitaciÛn (lluvias) medidos en cierta zona de Brasil, est· serie tiene estacionalidad anual (12 meses); notemos que es necesario fijar los par·metros de la descomposiciÛn adecuadamente ya que est·n asociados al n˙mero de retardos considerados al estimar tanto la componente estacional como la tendencia. 
-
-El gr·fico muestra en la primera fila la serie clim·tica, en segundo lugar muestra su componente estacional, en tercera fila encontramos su componente de tendencia, y finalmente el residuo. Como podemos notar las componentes de tendencia y estacionalidad est·n definidas en todo el dominio de tiempo.
+Ilustramos lo antes mencionado en la figura \ref{fig:stl_descomp}, que corresponde a la descomposici√≥n STL-Loess de una serie de datos mensuales de precipitaci√≥n (lluvias) medidos en cierta zona de Brasil, est√° serie tiene estacionalidad anual (12 meses); notemos que es necesario fijar los par√°metros de la descomposici√≥n adecuadamente ya que est√°n asociados al n√∫mero de retardos considerados al estimar tanto la componente estacional como la tendencia. El gr√°fico muestra en la primera fila la serie clim√°tica, en segundo lugar muestra su componente estacional, en tercera fila encontramos su componente de tendencia, y finalmente el residuo. Como podemos notar las componentes de tendencia y estacionalidad est√°n definidas en todo el dominio de tiempo.
 
 \begin{figure}[h]
-\caption{DescomposiciÛn STL-Loess de Serie}
+\caption{Descomposici√≥n STL-Loess de Serie}
 \includegraphics[width=15cm]{Cap2-Stl-Loess.png}
 \label{fig:stl_descomp}
 \centering
 \end{figure}
 
-Notemos que bastarÌa conocer los valores de $R_t$ en para todo $t$ e inmediatamente conocerÌamos los de $Y_t$ gracias a la ecuaciÛn \eqref{eq:stl_descomp}. 
-
-AsÌ, proponemos simular los valores perdidos de $R_t$. Una forma simple de simular dichos valores, es usando el mÈtodo simulaciÛn de la Transformada Inversa (Ver \cite{ross2006simulation} ) partiendo de la funciÛn de distribuciÛn empÌrica de los Residuos. Esto debido a que los residuos tienden a comportarse como un proceso estacionario, suponiendo que se especificaron bien los par·metros de la descomposiciÛn STL.
+Es decir, bastar√≠a conocer los valores de $R_t$ en todo instante $t$ e inmediatamente conocer√≠amos los valores de $Y_t$ de inmediato a partir de la ecuaci√≥n \eqref{eq:stl_descomp}.
 
 
-Pues bien, simulamos los valores perdidos de los residuos usando el siguiente algoritmo.
+As√≠, proponemos simular los valores perdidos de $R_t$. Una forma simple de simular dichos valores, es usando la funci√≥n de distribuci√≥n emp√≠rica de los Residuos, y el m√©todo simulaci√≥n de la ``Transformada Inversa''. Esto debido a que los residuos tienden a comportarse como un proceso estacionario, raz√≥n por la cual su distribuci√≥n es invariante en el tiempo (conservando su media y varianza constantes), suponiendo que se especificaron bien los par√°metros de la descomposici√≥n STL.
+
+
+Pues bien, proponemos el siguiente algoritmo de simulaci√≥n de valores perdidos de $Y_t$.
+
+\subsubsection{Algoritmo}
 
 \begin{enumerate}
-\item Primero calculamos la funciÛn de distribuciÛn empÌrica $\hat{F}_0(u)$ de los residuos de la descomposiciÛn. 
+\item Primero calculamos la descomposici√≥n STL de $Y_t$. As√≠ obtenemos:
+\begin{itemize}
+\item $T_t$, y $S_t$ para $t=1,2,...,n$
+\item $R_t$ para $t=1,2,...,j-1,j,k,k+1,...,n$
+\end{itemize}
 
-$$\hat{F}_0(u):=\frac{1}{n}\sum_{i=1}^{n} I_{(y_i\leq u)} $$
 
+\item Luego calculamos la funci√≥n de distribuci√≥n emp√≠rica $\hat{F}_0(u)$ de los residuos conocidos $R_t$.
 
+$$\hat{F}_0(u):=\frac{1}{n}\sum_{i\in J} \indic_{(R_i\leq u)} $$
+Donde $J=\{1,2,...,j-1,j,k,k+1,...,n\}$
+
+\item Usando el m√©todo de la Transformada Inversa \cite{ross2006simulation}. Para $t$ desde $j+1$ hasta $k-1$ (instantes en los que tenemos valores perdidos), hacer lo siguiente:
+
+\begin{itemize}
 \item Simular $u\sim U[0,1]$
-\item Calcular $y := \hat{F}_0^{-1}(u) = inf\{ t\in \mathbb{R}: u\leq \hat{F}_0(t) \} $
+\item Calcular $$r = \hat{F}_0^{-1}(u) := inf\{ t\in \mathbb{R}: u\leq \hat{F}_0(t) \} $$
+\item Definir $R_t := r$
+\item Calcular $Y_t:=T_t+S_t+R_t$
+\end{itemize}
 
 \end{enumerate}
 
-De esta manera $y$ sigue tiene distribuciÛn $\hat F_0$ (la distribuciÛn de los Residuos)
 
-Volviendo al ejemplo antes mostrado (Ver \ref{fig:stl_descomp} ), luego de simular los valores perdidos de $R_t$ obtenemos la serie completa $Y_t$ como se puede observar en  (\ref{fig:stl_descomp2})
+Volviendo al ejemplo antes mostrado \ref{fig:stl_descomp}, luego de aplicar el algoritmo de simulaci√≥n de valores perdidos obtenemos la serie completa $Y_t$ como se puede observar en la figura \ref{fig:stl_descomp2}.
 
 \begin{figure}[h]
 \caption{Serie Corregida}

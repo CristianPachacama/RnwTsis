@@ -8,7 +8,7 @@
 
 \theoremstyle{estiloejemplo}
     \newtheorem{ejemplo}{Ejemplo}
-    \newtheorem*{observacion}{Observación}
+    \newtheorem*{observacion}{ObservaciÃ³n}
 
 \newtheoremstyle{estiloteorema}%
     {9pt}{9pt}%
@@ -19,11 +19,11 @@
     {}
 
 \theoremstyle{estiloteorema}
-    \newtheorem{definicion}{Definición}[chapter]
+    \newtheorem{definicion}{DefiniciÃ³n}[chapter]
     \newtheorem{axioma}{Axioma}
     \newtheorem{teorema}{Teorema}[chapter]
     \newtheorem{corolario}[teorema]{Corolario}
-    \newtheorem{proposicion}[teorema]{Proposición}
+    \newtheorem{proposicion}[teorema]{ProposiciÃ³n}
     \newtheorem{lema}[teorema]{Lema}
 
 \renewcommand{\emph}{\textit}
@@ -42,20 +42,26 @@
 \newcommand{\cl}[1]{\overline{#1}}
 
 % --- Conjuntos
-\newcommand{\reales}{\mathbb{R}}
+%\newcommand{\reales}{\mathbb{R}}
 \newcommand{\R}{\mathbb{R}}
-\newcommand{\naturales}{\mathbb{N}}
-\newcommand{\N}{\omega}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\indic}{\mathbbm{1}}
+%\newcommand{\N}{\omega}
 \newcommand{\K}{\mathcal{K}}
 \newcommand{\Kp}{\mathscr{K}}
 \renewcommand{\P}{\mathcal{P}}
 \newcommand{\OR}{\bm{OR}}
 
+\newcommand{\norma}[1]{\left\Vert #1 \right\Vert}
+\newcommand{\producto}[2]{\left\langle #1 , #2\right\rangle}
+
 %\renewcommand{\baselinestretch}{1.5}
 
 % --- Sucesiones
-\newcommand{\suc}[2][n]{\left(#2\right)_{#1\in\naturales}}
-\newcommand{\ssuc}[2][n]{(#2)_{#1\in\naturales}}
+\newcommand{\suc}[2][n]{\left(#2\right)_{#1\in\N}}
+\newcommand{\ssuc}[2][n]{(#2)_{#1\in\N}}
 
 % --- Comentario
 \newcommand{\comentario}[1]{{\color{red!50!black}\textsf{#1}}}
